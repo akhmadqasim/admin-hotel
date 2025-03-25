@@ -17,6 +17,8 @@ model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   email    String @unique
   password String
+
+  @@map("users")
 }
 
 model Member {
@@ -26,6 +28,8 @@ model Member {
   birthDate    DateTime
   birthPlace   String
   reservations Reservation[]
+
+  @@map("members")
 }
 
 model Reservation {
@@ -35,4 +39,7 @@ model Reservation {
   price    Int
 
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@map("reservations")
 }
