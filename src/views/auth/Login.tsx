@@ -22,19 +22,15 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: {errors},
   } = useForm<Inputs>()
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirectTo: '/',
-      })
-    } catch (e) {
-      console.error('Error:', e)
-    }
+    await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirectTo: '/',
+    });
   }
 
   return (
