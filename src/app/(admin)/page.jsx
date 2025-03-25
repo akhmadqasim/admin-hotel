@@ -1,18 +1,13 @@
 // Components
 import {signOut} from "@/auth";
+import MasterLayout from "@/masterlayout/MasterLayout";
 
 const Page = async () => {
   return (
     <>
-      <h1>Dashboard</h1>
-      <form
-        action={async () => {
-          "use server"
-          await signOut()
-        }}
-      >
-        <button type="submit">Sign Out</button>
-      </form>
+      <MasterLayout>
+        <h1>Dashboard</h1>
+      </MasterLayout>
     </>
   )
 };
