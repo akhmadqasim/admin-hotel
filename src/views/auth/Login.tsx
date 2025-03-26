@@ -34,16 +34,11 @@ const Login = () => {
   }
 
   return (
-    <section className='auth bg-base d-flex flex-wrap'>
-      <div className='auth-left d-lg-block d-none'>
-        <div className='d-flex align-items-center flex-column h-100 justify-content-center'>
-          <img src='/images/auth/login/resort.jpg' alt=''/>
-        </div>
-      </div>
+    <section className='auth bg-base d-flex flex-wrap justify-content-center align-items-center min-vh-100'>
       <div className='auth-right py-32 px-24 d-flex flex-column justify-content-center'>
-        <div className='max-w-464-px mx-auto w-100'>
-          <div>
-            <h4 className='mb-12'>Penginapan Anisa</h4>
+        <div className='card border radius-16 shadow-sm p-32 max-w-464-px mx-auto w-100 bg-white'>
+          <div className='text-center'>
+            <h5 className='mb-12'>Penginapan Anisa</h5>
             <p className='mb-32 text-secondary-light text-lg'>
               Selamat datang, silahkan masuk untuk melanjutkan
             </p>
@@ -51,7 +46,7 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className='icon-field mb-16'>
               <span className='icon top-50 translate-middle-y'>
-                <Icon icon='mage:email'/>
+                <Icon icon='mage:email' />
               </span>
               <input
                 type='text'
@@ -63,7 +58,7 @@ const Login = () => {
             <div className='position-relative mb-20'>
               <div className='icon-field'>
                 <span className='icon top-50 translate-middle-y'>
-                  <Icon icon='solar:lock-password-outline'/>
+                  <Icon icon='solar:lock-password-outline' />
                 </span>
                 <input
                   type={passwordVisible ? 'text' : 'password'}
@@ -83,7 +78,6 @@ const Login = () => {
               type='submit'
               className='btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32'
             >
-              {" "}
               Masuk
             </button>
           </form>

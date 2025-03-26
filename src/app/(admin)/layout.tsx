@@ -1,5 +1,6 @@
 // Next
 import {redirect} from "next/navigation";
+import MasterLayout from "@/masterlayout/MasterLayout";
 
 // Auth
 import {auth} from "@/auth";
@@ -10,7 +11,9 @@ const adminLayout = async ({children}) => {
   if (session?.user) {
     return (
       <>
-        {children}
+        <MasterLayout>
+          {children}
+        </MasterLayout>
       </>
     )
   } else {

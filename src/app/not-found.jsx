@@ -1,7 +1,12 @@
+import MasterLayout from "@/masterlayout/MasterLayout";
+import Error from "@/views/error/Error";
+
 export default function NotFound() {
   return (
     <>
-      <h1>Error 404</h1>
+      <MasterLayout>
+        <Error />
+      </MasterLayout>
     </>
   );
 }
