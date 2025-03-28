@@ -8,6 +8,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         birthDate: "",
         birthPlace: "",
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (member) {
@@ -26,7 +27,6 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         if (name === "birthPlace" || name === "name") {
             formattedValue = value.toUpperCase();
         }
-
 
         setFormData((prev) => ({
             ...prev,
@@ -47,6 +47,8 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             return;
         }
 
+        setIsLoading(true);
+
         try {
             const res = await fetch(`/api/members/${member.id}`, {
                 method: "PATCH",
@@ -66,6 +68,8 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             onClose();
         } catch (error) {
             toast.error("Terjadi kesalahan saat mengirim data.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -121,8 +125,8 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                     className="form-control"
                                 />
                             </div>
-                            <button type="submit" className="btn btn-warning mt-3">
-                                Simpan Perubahan
+                            <button type="submit" className="btn btn-warning mt-3" disabled={isLoading}>
+                                {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                             </button>
                         </form>
                     </div>

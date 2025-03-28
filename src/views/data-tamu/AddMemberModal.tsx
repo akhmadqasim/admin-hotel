@@ -8,6 +8,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         birthDate: "",
         birthPlace: "",
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -48,6 +49,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             birthPlace: formData.birthPlace,
         };
 
+        setIsLoading(true);
+
         try {
             const res = await fetch("/api/members", {
                 method: "POST",
@@ -75,6 +78,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             onClose();
         } catch (error) {
             toast.error("Gagal mengirim data.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -106,30 +111,9 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                 <label className="form-label">Tanggal Lahir</label>
                                 <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-control" />
                             </div>
-
-                            {/*<div>*/}
-                            {/*    <label className="form-label">Tanggal Reservasi</label>*/}
-                            {/*    <input*/}
-                            {/*        type="date"*/}
-                            {/*        name="reservationDate"*/}
-                            {/*        value={formData.reservationDate}*/}
-                            {/*        onChange={handleChange}*/}
-                            {/*        className="form-control"*/}
-                            {/*    />*/}
-                            {/*</div>*/}
-                            {/*<div>*/}
-                            {/*    <label className="form-label">Harga Reservasi</label>*/}
-                            {/*    <input*/}
-                            {/*        type="number"*/}
-                            {/*        name="reservationPrice"*/}
-                            {/*        value={formData.reservationPrice}*/}
-                            {/*        onChange={handleChange}*/}
-                            {/*        className="form-control"*/}
-                            {/*        placeholder="Masukkan harga (Rp)"*/}
-                            {/*    />*/}
-                            {/*</div>*/}
-
-                            <button type="submit" className="btn btn-success mt-3">Tambah</button>
+                            <button type="submit" className="btn btn-success mt-3" disabled={isLoading}>
+                                {isLoading ? "Menambah..." : "Tambah"}
+                            </button>
                         </form>
                     </div>
                 </div>
