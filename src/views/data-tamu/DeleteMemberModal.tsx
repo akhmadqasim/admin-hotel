@@ -1,6 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 
 const DeleteMemberModal = ({ isOpen, onClose, member, onConfirm }) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleConfirm = async () => {
+        setIsLoading(true);
+        try {
+            await onConfirm(member.id);
+        } catch (error) {
+            console.error("Failed to delete member:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (!isOpen || !member) return null;
 
     return (
@@ -17,16 +30,11 @@ const DeleteMemberModal = ({ isOpen, onClose, member, onConfirm }) => {
                         </p>
                     </div>
                     <div className="modal-footer">
-                        <button className="btn btn-secondary" onClick={onClose}>
+                        <button className="btn btn-secondary" onClick={onClose} disabled={isLoading}>
                             Batal
                         </button>
-                        <button
-                            className="btn btn-danger"
-                            onClick={() => {
-                                onConfirm(member.id);
-                            }}
-                        >
-                            Hapus
+                        <button className="btn btn-danger" onClick={handleConfirm} disabled={isLoading}>
+                            {isLoading ? "Menghapus..." : "Hapus"}
                         </button>
                     </div>
                 </div>
