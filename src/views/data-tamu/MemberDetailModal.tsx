@@ -12,7 +12,7 @@ const MemberDetailModal = ({ isOpen, onClose, member }) => {
     };
 
     return (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1}  style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header text-white">

@@ -59,7 +59,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
     if (!isOpen || !member) return null;
 
     return (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1}  style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header bg-success text-white">
