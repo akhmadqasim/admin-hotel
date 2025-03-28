@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials"
 
+// Import Prisma
+import {prisma} from "@/helper/prisma";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -12,12 +15,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
 
       authorize: async (credentials) => {
-        if (credentials.email === "admin") {
-          // No user found, so this is their first attempt to login
-          // Optionally, this is also the place you could do a user registration
-          return {
-            name: "Admin",
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials?.email.toString(),
+              password: credentials?.password.toString(),
+            },
+          })
+
+          if (!user) {
+            return null
           }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: 'admin',
+          }
+        } catch (error) {
+          return null
         }
 
         return null
