@@ -1,11 +1,10 @@
 // Components
-import {signOut} from "@/auth";
-import MasterLayout from "@/masterlayout/MasterLayout";
+import CardCount from "@/views/dashboard/CardCount";
 
 const Page = async () => {
   return (
     <>
-      <h1>Dashboard</h1>
+      <CardCount />
     </>
   )
 };

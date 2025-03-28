@@ -113,17 +113,12 @@ const MasterLayout = ({ children }) => {
         <div>
           <Link href='/' className='sidebar-logo'>
             <img
-              src='assets/images/logo.png'
+              src='assets/images/logo.jpg'
               alt='site logo'
               className='light-logo'
             />
             <img
-              src='assets/images/logo-light.png'
-              alt='site logo'
-              className='dark-logo'
-            />
-            <img
-              src='assets/images/logo-icon.png'
+              src='assets/images/logo-icon.jpg'
               alt='site logo'
               className='logo-icon'
             />
@@ -153,6 +148,15 @@ const MasterLayout = ({ children }) => {
               >
                 <Icon icon='mingcute:storage-line' className='menu-icon' />
                 <span>Data Tamu</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href='/reservasi'
+                className={pathname === "/reservasi" ? "active-page" : ""}
+              >
+                <Icon icon='mingcute:storage-line' className='menu-icon' />
+                <span>Data Reservasi</span>
               </Link>
             </li>
             <li>
@@ -202,17 +206,10 @@ const MasterLayout = ({ children }) => {
                 >
                   <Icon icon='heroicons:bars-3-solid' className='icon' />
                 </button>
-                <form className='navbar-search'>
-                  <input type='text' name='search' placeholder='Search' />
-                  <Icon icon='ion:search-outline' className='icon' />
-                </form>
               </div>
             </div>
             <div className='col-auto'>
               <div className='d-flex flex-wrap align-items-center gap-3'>
-                {/* ThemeToggleButton */}
-                <ThemeToggleButton />
-                {/* Language dropdown end */}
                 <div className='dropdown'>
                   <button
                     className='d-flex justify-content-center align-items-center rounded-circle'
@@ -229,7 +226,7 @@ const MasterLayout = ({ children }) => {
                     <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
                       <div>
                         <h6 className='text-lg text-primary-light fw-semibold mb-2'>
-                          Aqas Pradipa Firmansyah
+                          Admin
                         </h6>
                         <span className='text-secondary-light fw-medium text-sm'>
                           Admin
@@ -268,11 +265,11 @@ const MasterLayout = ({ children }) => {
         <footer className='d-footer'>
           <div className='row align-items-center justify-content-between'>
             <div className='col-auto'>
-              <p className='mb-0'>© 2025 AqasPradipa. All Rights Reserved.</p>
+              <p className='mb-0'>© 2025 JanjianAja. All Rights Reserved.</p>
             </div>
             <div className='col-auto'>
               <p className='mb-0'>
-                Made by <span className='text-primary-600'>Aqas Pradipa</span>
+                Made by <span className='text-primary-600'>JanjianAja</span>
               </p>
             </div>
           </div>
