@@ -1,8 +1,7 @@
 import { prisma } from "@/helper/prisma"
+import ReservasiList from "@/views/data-reservasi/ReservasiList";
 
-import MemberList from "@/views/data-tamu/MemberList";
-
-const DataTamuPage = async () => {
+const DataReservasiPage = async () => {
   const members = await prisma.member.findMany({
     include: {
       reservations: true,
@@ -14,9 +13,9 @@ const DataTamuPage = async () => {
 
   return (
     <div>
-      <MemberList data={JSON.stringify(members)} />
+       <ReservasiList data={JSON.stringify(members)}/>
     </div>
   );
 }
 
-export default DataTamuPage;
+export default DataReservasiPage;

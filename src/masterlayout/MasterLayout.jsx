@@ -157,6 +157,15 @@ const MasterLayout = ({ children }) => {
             </li>
             <li>
               <Link
+                href='/reservasi'
+                className={pathname === "/reservasi" ? "active-page" : ""}
+              >
+                <Icon icon='mingcute:storage-line' className='menu-icon' />
+                <span>Data Reservasi</span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 href='/rekap-pemasukan'
                 className={pathname === "/rekap-pemasukan" ? "active-page" : ""}
               >
@@ -202,10 +211,6 @@ const MasterLayout = ({ children }) => {
                 >
                   <Icon icon='heroicons:bars-3-solid' className='icon' />
                 </button>
-                <form className='navbar-search'>
-                  <input type='text' name='search' placeholder='Search' />
-                  <Icon icon='ion:search-outline' className='icon' />
-                </form>
               </div>
             </div>
             <div className='col-auto'>

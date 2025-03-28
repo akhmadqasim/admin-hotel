@@ -1,8 +1,27 @@
-export default function RekapPemasukanPage() {
+import { prisma } from "@/helper/prisma";
+import RekapPemasukanList from "@/views/rekap-pemasukan/RekapPemasukanList";
+
+const RekapPemasukanPage = async () => {
+  const members = await prisma.member.findMany({
+    include: {
+      reservations: true,
+    },
+  });
+
+  const rekapData = members.flatMap((member) =>
+    member.reservations.map((reservation) => ({
+      id: reservation.id,
+      memberName: member.name,
+      tanggal: reservation.date,
+      harga: reservation.price,
+    }))
+  );
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Rekap Pemasukan</h1>
-      <p>Ini halaman untuk melihat rekap pemasukan.</p>
+      <RekapPemasukanList data={JSON.stringify(rekapData)} />
     </div>
   );
-}
+};
+
+export default RekapPemasukanPage;
