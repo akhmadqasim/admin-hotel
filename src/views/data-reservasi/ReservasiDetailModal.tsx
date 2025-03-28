@@ -33,7 +33,7 @@ const ReservasiDetailModal = ({ member, onClose }) => {
     };
 
     return (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1}  style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content shadow-lg rounded-3 overflow-hidden">
                     <div className="modal-header text-white">

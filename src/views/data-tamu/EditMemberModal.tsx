@@ -76,7 +76,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     if (!isOpen || !member) return null;
 
     return (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog">
                 <div className="modal-content rounded-4 shadow-lg">
                     <div className="modal-header bg-light rounded-top-4">
