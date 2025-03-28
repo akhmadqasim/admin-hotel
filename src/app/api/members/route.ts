@@ -41,7 +41,6 @@ export const POST = async (req: NextRequest) => {
       member
     })
   } catch (e) {
-    console.log(e)
     return NextResponse.json({message: "Invalid data"}, {status: 400})
   }
 }

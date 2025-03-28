@@ -6,13 +6,7 @@ import type {NextRequest} from "next/server";
 import {auth} from "@/auth";
 
 export const middleware = async (req: NextRequest) => {
-  // if (req.method === "GET") {
-  //   return;
-  // }
-
-  const session = await auth();
-
-  console.log(session?.user);
+    const session = await auth();
 
   if (!session) {
     return NextResponse.json({message: "Unauthorized"}, {status: 401});

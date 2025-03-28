@@ -23,11 +23,15 @@ export const GET = async (req: NextRequest, {params}: { params: Promise<{ member
 export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ memberId: string }> }) => {
   const {memberId} = await params;
 
-  await prisma.member.delete({
+  const result = await prisma.member.delete({
     where: {
       id: memberId
     }
   })
+
+  if (!result) {
+    return NextResponse.json({message: 'Member not found'}, {status: 404})
+  }
 
   return new NextResponse(null, {status: 204});
 };
