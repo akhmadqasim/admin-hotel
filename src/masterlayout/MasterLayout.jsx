@@ -161,6 +161,15 @@ const MasterLayout = ({ children }) => {
             </li>
             <li>
               <Link
+                href='/reservasi'
+                className={pathname === "/reservasi" ? "active-page" : ""}
+              >
+                <Icon icon='mingcute:storage-line' className='menu-icon' />
+                <span>Data Reservasi</span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 href='/rekap-pemasukan'
                 className={pathname === "/rekap-pemasukan" ? "active-page" : ""}
               >
