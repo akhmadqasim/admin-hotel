@@ -147,7 +147,7 @@ const MasterLayout = ({ children }) => {
                 className={pathname === "/tamu" ? "active-page" : ""}
               >
                 <Icon icon='mingcute:storage-line' className='menu-icon' />
-                <span>Data Tamu</span>
+                <span>Input Data Tamu Baru</span>
               </Link>
             </li>
             <li>
@@ -156,7 +156,7 @@ const MasterLayout = ({ children }) => {
                 className={pathname === "/reservasi" ? "active-page" : ""}
               >
                 <Icon icon='mingcute:storage-line' className='menu-icon' />
-                <span>Data Reservasi</span>
+                <span>Rekap Data Tamu</span>
               </Link>
             </li>
             <li>
