@@ -15280,7 +15280,7 @@ td.fc-header-center {
 }
 .navbar-search {
   position: relative;
-  display: none;
+  display: inline-block;
 }
 
 @media (min-width: 992px) {

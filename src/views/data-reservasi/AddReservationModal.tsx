@@ -62,7 +62,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
         <div className="modal show d-block" tabIndex={-1}  style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog">
                 <div className="modal-content">
-                    <div className="modal-header bg-success text-white">
+                    <div className="modal-header text-white">
                         <h6 className="modal-title">Tambah Reservasi {member.name}</h6>
                         <button type="button" className="btn-close" onClick={onClose} disabled={isLoading}></button>
                     </div>
