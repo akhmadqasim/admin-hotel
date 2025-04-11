@@ -27,6 +27,10 @@ const RekapPemasukanList = ({ data }) => {
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
 
+    const category = [
+        "Semua", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Lainnya", "Rekap Biaya Reservasi"
+    ];
+
     const uniqueYears = useMemo(() => {
         const years = items.map(item => {
             const date = getSafeDate(item.tanggal);
@@ -142,6 +146,14 @@ const RekapPemasukanList = ({ data }) => {
                     >
                         {uniqueYears.map((year, i) => (
                             <option key={i} value={year}>{year}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="form-select w-auto"
+                    >
+                        {category.map((cat, i) => (
+                            <option key={i} value={cat}>{cat}</option>
                         ))}
                     </select>
 
