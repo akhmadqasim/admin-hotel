@@ -34,13 +34,16 @@ model Member {
 }
 
 model Reservation {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  memberId String   @db.ObjectId
-  date     DateTime
-  price    Int
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  memberId    String    @db.ObjectId
+  beginDate   DateTime
+  endDate     DateTime?
+  roomNumber  String?
+  mealCost    Int?
+  laundryCost Int?
+  otherCost   Int?
 
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
-  @@index([date])
   @@map("reservations")
 }
