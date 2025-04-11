@@ -131,7 +131,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             } else {
                 member._count = { reservations: 0 };
             }
-
             onSubmit(member);
             toast.success("Member berhasil ditambahkan!");
             resetForm();
