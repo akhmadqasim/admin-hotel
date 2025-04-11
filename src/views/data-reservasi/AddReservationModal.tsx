@@ -69,6 +69,16 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
                             <div>
+                                <label className="form-label">Nomor Kamar</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="roomNumber"
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
                                 <label className="form-label">Tanggal Menginap</label>
                                 <input
                                     type="date"
@@ -86,6 +96,36 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     className="form-control"
                                     name="price"
                                     value={form.price}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label">Biaya Makan</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="mealCost"
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label">Biaya Laundry</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="laundryCost"
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label">Biaya Lainnya</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="othersCost"
                                     onChange={handleChange}
                                     disabled={isLoading}
                                 />

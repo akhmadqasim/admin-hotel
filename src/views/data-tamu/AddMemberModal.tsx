@@ -211,6 +211,16 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                             {hasReservation && (
                                 <>
                                     <div>
+                                        <label className="form-label">Nomor Kamar</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="roomNumber"
+                                            onChange={handleReservationChange}
+                                            placeholder="Masukkan nomor kamar"
+                                        />
+                                    </div>
+                                    <div>
                                         <label className="form-label">Tanggal Reservasi</label>
                                         <input
                                             type="date"
@@ -229,6 +239,36 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             onChange={handleReservationChange}
                                             className="form-control"
                                             placeholder="Masukkan harga reservasi"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Biaya Makan</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            name="mealCost"
+                                            onChange={handleReservationChange}
+                                            placeholder="Masukkan biaya makan"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Biaya Laundry</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            name="laundryCost"
+                                            onChange={handleReservationChange}
+                                            placeholder="Masukkan biaya laundry"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Biaya Lainnya</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            name="othersCost"
+                                            onChange={handleReservationChange}
+                                            placeholder="Masukkan biaya lainnya"
                                         />
                                     </div>
                                 </>
