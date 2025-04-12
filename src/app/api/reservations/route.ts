@@ -12,6 +12,7 @@ const reservationSchema = v.object({
     beginDate: v.optional(v.date()),
     endDate: v.optional(v.date()),
     roomNumber: v.optional(v.string()),
+    price: v.optional(v.number()),
     mealCost: v.optional(v.number()),
     laundryCost: v.optional(v.number()),
     otherCost: v.optional(v.number()),
@@ -34,21 +35,14 @@ export const POST = async (req: NextRequest) => {
             ...(body.beginDate ? {beginDate: new Date(body.beginDate)} : {}),
             ...(body.endDate ? {endDate: new Date(body.endDate)} : {}),
             ...(body.roomNumber ? {roomNumber: body.roomNumber} : {}),
+            ...(body.price ? {price: body.price} : {}),
             ...(body.mealCost ? {mealCost: body.mealCost} : {}),
             ...(body.laundryCost ? {laundryCost: body.laundryCost} : {}),
             ...(body.otherCost ? {otherCost: body.otherCost} : {}),
         });
 
         const reservation = await prisma.reservation.create({
-            data: {
-                memberId: data.memberId,
-                beginDate: data.beginDate,
-                ...(data.endDate ? {endDate: data.endDate} : {}),
-                ...(data.roomNumber ? {roomNumber: data.roomNumber} : {}),
-                ...(data.mealCost ? {mealCost: data.mealCost} : {}),
-                ...(data.laundryCost ? {laundryCost: data.laundryCost} : {}),
-                ...(data.otherCost ? {otherCost: data.otherCost} : {})
-            }
+            data
         });
 
         return NextResponse.json({

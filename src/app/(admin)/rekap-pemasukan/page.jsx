@@ -12,8 +12,13 @@ const RekapPemasukanPage = async () => {
     member.reservations.map((reservation) => ({
       id: reservation.id,
       memberName: member.name,
-      tanggal: reservation.date,
-      harga: reservation.price,
+      roomNumber: reservation.roomNumber,
+      beginDate: reservation.beginDate,
+      endDate: reservation.endDate,
+      laundryCost: reservation.laundryCost,
+      otherCost: reservation.otherCost,
+      mealCost: reservation.mealCost,
+      price: reservation.price,
     }))
   );
 

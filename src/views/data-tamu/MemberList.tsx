@@ -33,9 +33,11 @@ const MemberList = ({ data }) => {
     };
 
     const handleEditMember = (updatedMember) => {
-        setMembers(prev =>
-            prev.map(m => (m.id === updatedMember.id ? updatedMember : m))
+        setMembers((prevMembers) =>
+            prevMembers.map((member) => (member.id === updatedMember.id ? updatedMember : member))
         );
+        setIsEditModalOpen(false);
+        setSelectedMember(null);
     };
 
     const handleDeleteMember = async (id) => {

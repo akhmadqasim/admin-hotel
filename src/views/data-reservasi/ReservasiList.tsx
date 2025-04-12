@@ -38,13 +38,19 @@ const ReservasiList = ({ data }) => {
         setIsAddReservasiOpen(true);
     };
 
-    const handleAddReservasi = (newReservasi) => {
+    const handleAddReservasi = (newData) => {
+        const newReservations = Array.isArray(newData) ? newData : [newData];
+
         setMembers((prev) =>
             prev.map((m) =>
-                m.id === selectedMember.id
+                m.id === selectedMember?.id
                     ? {
                         ...m,
-                        reservations: [...(m.reservations || []), newReservasi],
+                        reservations: [...(m.reservations || []), ...newReservations],
+                        _count: {
+                            ...m._count,
+                            reservations: (m._count?.reservations || 0) + newReservations.length,
+                        },
                     }
                     : m
             )
@@ -89,7 +95,7 @@ const ReservasiList = ({ data }) => {
                                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                     <td>{member.nik}</td>
                                     <td>{member.name}</td>
-                                    <td>{member.reservations?.length || 0}</td>
+                                    <td>{member._count?.reservations ?? 0}</td>
                                     <td>
                                         <div className="d-flex gap-2 flex-wrap">
                                             <button

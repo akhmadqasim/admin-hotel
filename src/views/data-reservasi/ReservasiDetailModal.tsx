@@ -10,19 +10,20 @@ const ReservasiDetailModal = ({ member, onClose }) => {
     const filtered = useMemo(() => {
         const q = searchQuery.toLowerCase();
         return member.reservations?.filter((res) => {
-            const formattedDate = new Date(res.date).toLocaleDateString("id-ID", {
+            const formattedDate = new Date(res.beginDate).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
                 year: "numeric"
             });
             return (
                 formattedDate.toLowerCase().includes(q) ||
-                res.price.toString().includes(q)
+                res.price.toString().includes(q) ||
+                res.roomNumber.toLowerCase().includes(q)
             );
         }) || [];
     }, [member.reservations, searchQuery]);
 
-    const totalHarga = filtered.reduce((acc, curr) => acc + curr.price, 0);
+    const totalHarga = filtered.reduce((acc, curr) => acc + (curr.price || 0), 0);
 
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -33,7 +34,7 @@ const ReservasiDetailModal = ({ member, onClose }) => {
     };
 
     return (
-        <div className="modal show d-block" tabIndex={-1}  style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content shadow-lg rounded-3 overflow-hidden">
                     <div className="modal-header text-white">
@@ -59,28 +60,36 @@ const ReservasiDetailModal = ({ member, onClose }) => {
                                 <table className="table table-bordered table-striped align-middle">
                                     <thead className="table-light sticky-top">
                                     <tr>
-                                        <th className="text-center">No</th>
-                                        <th>Tanggal</th>
-                                        <th>Biaya Inap</th>
+                                        <th className="text-center" style={{ width: "60px" }}>No</th>
+                                        <th style={{ width: "150px" }}>Nomor Kamar</th>
+                                        <th style={{ width: "200px" }}>Tanggal</th>
+                                        <th style={{ width: "180px" }}>Biaya Reservasi</th>
+                                        <th style={{ width: "180px" }}>Biaya Makan</th>
+                                        <th style={{ width: "180px" }}>Biaya Laundry</th>
+                                        <th style={{ width: "180px" }}>Biaya Lainnya</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {paginated.map((res, idx) => (
                                         <tr key={idx}>
                                             <td className="text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                                            <td>{new Date(res.date).toLocaleDateString("id-ID", {
+                                            <td>{res.roomNumber}</td>
+                                            <td>{new Date(res.beginDate).toLocaleDateString("id-ID", {
                                                 day: "numeric",
                                                 month: "long",
                                                 year: "numeric"
                                             })}</td>
-                                            <td>Rp {res.price.toLocaleString("id-ID")}</td>
+                                            <td>Rp {(res.price || 0).toLocaleString("id-ID")}</td>
+                                            <td>Rp {(res.mealCost || 0).toLocaleString("id-ID")}</td>
+                                            <td>Rp {(res.laundryCost || 0).toLocaleString("id-ID")}</td>
+                                            <td>Rp {(res.otherCost || 0).toLocaleString("id-ID")}</td>
                                         </tr>
                                     ))}
                                     </tbody>
                                     <tfoot>
                                     <tr>
-                                        <th colSpan="2" className="text-end">Total</th>
-                                        <th>Rp {totalHarga.toLocaleString("id-ID")}</th>
+                                        <th colSpan="6" className="text-end">Total</th>
+                                        <th className="text-start">Rp {totalHarga.toLocaleString("id-ID")}</th>
                                     </tr>
                                     </tfoot>
                                 </table>

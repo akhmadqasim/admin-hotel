@@ -18,6 +18,7 @@ const RekapPemasukanList = ({ data }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedMonth, setSelectedMonth] = useState("Semua");
     const [selectedYear, setSelectedYear] = useState("Semua");
+    const [selectedCategory, setSelectedCategory] = useState("Semua");
     const [exportFormat, setExportFormat] = useState("excel");
 
     const itemsPerPage = 10;
@@ -33,7 +34,7 @@ const RekapPemasukanList = ({ data }) => {
 
     const uniqueYears = useMemo(() => {
         const years = items.map(item => {
-            const date = getSafeDate(item.tanggal);
+            const date = getSafeDate(item.beginDate);
             return date ? date.getFullYear() : null;
         }).filter(Boolean);
         return ["Semua", ...Array.from(new Set(years))];
@@ -42,14 +43,42 @@ const RekapPemasukanList = ({ data }) => {
     const filteredItems = useMemo(() => {
         const keyword = searchQuery.toLowerCase();
 
-        return items.filter((item) => {
-            const tanggal = getSafeDate(item.tanggal);
-            const matchesKeyword = item.memberName.toLowerCase().includes(keyword);
-            const matchesMonth = selectedMonth === "Semua" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
-            const matchesYear = selectedYear === "Semua" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
-            return matchesKeyword && matchesMonth && matchesYear;
-        });
-    }, [items, searchQuery, selectedMonth, selectedYear]);
+        return items
+            .filter((item) => {
+                const tanggal = getSafeDate(item.beginDate);
+                const matchesKeyword = item.memberName.toLowerCase().includes(keyword);
+                const matchesMonth =
+                    selectedMonth === "Semua" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
+                const matchesYear =
+                    selectedYear === "Semua" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
+                return matchesKeyword && matchesMonth && matchesYear;
+            })
+            .map((item) => {
+                let harga = 0;
+                switch (selectedCategory) {
+                    case "Rekap Biaya Makan":
+                        harga = item.mealCost ?? 0;
+                        break;
+                    case "Rekap Biaya Laundry":
+                        harga = item.laundryCost ?? 0;
+                        break;
+                    case "Rekap Biaya Lainnya":
+                        harga = item.otherCost ?? 0;
+                        break;
+                    case "Rekap Biaya Reservasi":
+                        harga = item.price ?? 0;
+                        break;
+                    default:
+                        harga =
+                            (item.laundryCost ?? 0) +
+                            (item.mealCost ?? 0) +
+                            (item.otherCost ?? 0) +
+                            (item.price ?? 0);
+                        break;
+                }
+                return { ...item, harga };
+            });
+    }, [items, searchQuery, selectedMonth, selectedYear, selectedCategory]);
 
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
     const paginatedItems = filteredItems.slice(
@@ -59,16 +88,23 @@ const RekapPemasukanList = ({ data }) => {
 
     const totalHarga = filteredItems.reduce((sum, item) => sum + item.harga, 0);
 
-    const exportToExcel = () => {
-        const exportData = filteredItems.map((res) => {
-            const tanggalObj = getSafeDate(res.tanggal);
-            return {
-                "Nama Member": res.memberName,
-                "Tanggal": tanggalObj ? format(tanggalObj, "dd-MM-yyyy") : "Tanggal tidak valid",
-                "Harga": res.harga
-            };
-        });
+    const exportData = filteredItems.map((res) => {
+        const tanggalObj = getSafeDate(res.beginDate);
+        const formattedDate = tanggalObj ? format(tanggalObj, "yyyy-MM-dd") : "Invalid";
+        const month = tanggalObj ? format(tanggalObj, "MMMM", { locale: id }) : "-";
+        const year = tanggalObj ? format(tanggalObj, "yyyy") : "-";
 
+        return {
+            "Nama Member": res.memberName,
+            "Tanggal": formattedDate,
+            "Bulan": month,
+            "Tahun": year,
+            "Harga": res.harga,
+            "Kategori": selectedCategory === "Semua" ? "Total" : selectedCategory.replace("Rekap Biaya ", "")
+        };
+    });
+
+    const exportToExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap");
@@ -79,15 +115,6 @@ const RekapPemasukanList = ({ data }) => {
     };
 
     const exportToCSV = () => {
-        const exportData = filteredItems.map((res) => {
-            const tanggalObj = getSafeDate(res.tanggal);
-            return {
-                "Nama Member": res.memberName,
-                "Tanggal": tanggalObj ? format(tanggalObj, "dd-MM-yyyy") : "Tanggal tidak valid",
-                "Harga": res.harga
-            };
-        });
-
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
         const blob = new Blob([csvOutput], { type: "text/csv;charset=utf-8;" });
@@ -121,7 +148,6 @@ const RekapPemasukanList = ({ data }) => {
                 </form>
             </div>
             <div className="card-body p-24">
-                {/* FILTERS */}
                 <div className="d-flex gap-3 flex-wrap mb-3">
                     <select
                         className="form-select w-auto"
@@ -151,6 +177,11 @@ const RekapPemasukanList = ({ data }) => {
 
                     <select
                         className="form-select w-auto"
+                        value={selectedCategory}
+                        onChange={(e) => {
+                            setSelectedCategory(e.target.value);
+                            setCurrentPage(1);
+                        }}
                     >
                         {category.map((cat, i) => (
                             <option key={i} value={cat}>{cat}</option>
@@ -172,7 +203,6 @@ const RekapPemasukanList = ({ data }) => {
                     </button>
                 </div>
 
-                {/* TABLE */}
                 <div className="table-responsive scroll-sm">
                     <table className="table bordered-table sm-table mb-0">
                         <thead>
@@ -182,13 +212,13 @@ const RekapPemasukanList = ({ data }) => {
                             <th>Tanggal</th>
                             <th>Bulan</th>
                             <th>Tahun</th>
-                            <th>Harga</th>
+                            <th>{selectedCategory === "Semua" ? "Total Keseluruhan" : "Harga"}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {paginatedItems.length > 0 ? (
                             paginatedItems.map((res, index) => {
-                                const tanggalObj = getSafeDate(res.tanggal);
+                                const tanggalObj = getSafeDate(res.beginDate);
 
                                 return (
                                     <tr key={res.id}>
@@ -203,7 +233,7 @@ const RekapPemasukanList = ({ data }) => {
                                         ) : (
                                             <td colSpan={3}>Tanggal tidak valid</td>
                                         )}
-                                        <td>Rp {res.harga.toLocaleString("id-ID")}</td>
+                                        <td>Rp {(res.harga ?? 0).toLocaleString("id-ID")}</td>
                                     </tr>
                                 );
                             })
@@ -224,11 +254,10 @@ const RekapPemasukanList = ({ data }) => {
                     </table>
                 </div>
 
-                {/* PAGINATION */}
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-                    <span>
-                        Menampilkan {paginatedItems.length} dari {filteredItems.length} entri
-                    </span>
+          <span>
+            Menampilkan {paginatedItems.length} dari {filteredItems.length} entri
+          </span>
                     <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                         <li className="page-item">
                             <button

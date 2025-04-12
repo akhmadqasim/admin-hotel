@@ -39,6 +39,7 @@ model Reservation {
   beginDate   DateTime
   endDate     DateTime?
   roomNumber  String?
+  price       Int?
   mealCost    Int?
   laundryCost Int?
   otherCost   Int?

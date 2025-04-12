@@ -11,8 +11,13 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
     const [hasReservation, setHasReservation] = useState(false);
     const [reservationData, setReservationData] = useState({
-        date: "",
+        roomNumber: "",
+        beginDate: "",
+        endDate: "",
         price: "",
+        mealCost: "",
+        laundryCost: "",
+        otherCost: "",
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -26,8 +31,13 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         });
         setHasReservation(false);
         setReservationData({
-            date: "",
+            roomNumber: "",
+            beginDate: "",
+            endDate: "",
             price: "",
+            mealCost: "",
+            laundryCost: "",
+            otherCost: "",
         });
     };
 
@@ -69,8 +79,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         }
 
         if (hasReservation) {
-            const { date, price } = reservationData;
-            if (!date || !price) {
+            const { beginDate, endDate, price } = reservationData;
+            if (!beginDate || !endDate || !price) {
                 toast.error("Tanggal dan harga reservasi wajib diisi.");
                 return false;
             }
@@ -81,10 +91,22 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
-        const priceValue = parseInt(reservationData.price);
+        const {
+            roomNumber,
+            price,
+            mealCost,
+            laundryCost,
+            otherCost,
+            beginDate,
+            endDate
+        } = reservationData;
+
+        const priceValue = parseInt(price || "0");
+        const meal = parseInt(mealCost || "0");
+        const laundry = parseInt(laundryCost || "0");
+        const others = parseInt(otherCost || "0");
 
         const payload = {
             ...formData,
@@ -109,28 +131,37 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             const member = result.member;
 
             if (hasReservation) {
-                const reservationRes = await fetch("/api/reservations", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        memberId: member.id,
-                        date: reservationData.date,
-                        price: priceValue,
-                    }),
-                });
+                const dates = getDatesInRange(beginDate, endDate);
 
-                const reservationResult = await reservationRes.json();
+                const reservationPayloads = dates.map((date) => ({
+                    memberId: String(member.id),
+                    beginDate: formatDateToISOOffset(date),
+                    endDate: formatDateToISOOffset(date),
+                    roomNumber: roomNumber || undefined,
+                    price: priceValue || undefined,
+                    mealCost: meal || undefined,
+                    laundryCost: laundry || undefined,
+                    otherCost: others || undefined,
+                }));
 
-                if (!reservationRes.ok) {
-                    toast.error(reservationResult.error || "Reservasi gagal ditambahkan.");
-                    return;
-                }
+                const reservationResponses = await Promise.all(
+                    reservationPayloads.map((payload) =>
+                        fetch("/api/reservations", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        }).then((res) => res.json())
+                    )
+                );
 
-                member.reservations = [reservationResult.reservation];
-                member._count = { reservations: 1 };
+                member.reservations = reservationResponses.map((r) => r.reservation);
+                member._count = {
+                    reservations: member.reservations.length,
+                };
             } else {
                 member._count = { reservations: 0 };
             }
+
             onSubmit(member);
             toast.success("Member berhasil ditambahkan!");
             resetForm();
@@ -142,6 +173,25 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             setIsLoading(false);
         }
     };
+
+    const formatDateToISOOffset = (date) => {
+        const tzOffset = "+00:00";
+        return date.toISOString().replace("Z", tzOffset);
+    };
+
+    const getDatesInRange = (start, end) => {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const dates = [];
+
+        while (startDate <= endDate) {
+            dates.push(new Date(startDate));
+            startDate.setDate(startDate.getDate() + 1);
+        }
+
+        return dates;
+    };
+
 
     if (!isOpen) return null;
 
@@ -159,27 +209,21 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     </div>
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
-                            {/* Input Member */}
-                            {[
-                                { label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
+                            {[{ label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
                                 { label: "Nama", name: "name", placeholder: "Masukkan Nama" },
-                                {
-                                    label: "Tempat Lahir",
-                                    name: "birthPlace",
-                                    placeholder: "Masukkan Tempat Lahir",
-                                },
-                            ].map((field) => (
-                                <div key={field.name}>
-                                    <label className="form-label">{field.label}</label>
-                                    <input
-                                        name={field.name}
-                                        value={formData[field.name]}
-                                        onChange={handleChange}
-                                        className="form-control"
-                                        placeholder={field.placeholder}
-                                    />
-                                </div>
-                            ))}
+                                { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir" }]
+                                .map((field) => (
+                                    <div key={field.name}>
+                                        <label className="form-label">{field.label}</label>
+                                        <input
+                                            name={field.name}
+                                            value={formData[field.name]}
+                                            onChange={handleChange}
+                                            className="form-control"
+                                            placeholder={field.placeholder}
+                                        />
+                                    </div>
+                                ))}
 
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
@@ -206,7 +250,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                 </label>
                             </div>
 
-
                             {hasReservation && (
                                 <>
                                     <div>
@@ -215,16 +258,27 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             type="text"
                                             className="form-control"
                                             name="roomNumber"
+                                            value={reservationData.roomNumber}
                                             onChange={handleReservationChange}
                                             placeholder="Masukkan nomor kamar"
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label">Tanggal Reservasi</label>
+                                        <label className="form-label">Tanggal Mulai</label>
                                         <input
                                             type="date"
-                                            name="date"
-                                            value={reservationData.date}
+                                            name="beginDate"
+                                            value={reservationData.beginDate}
+                                            onChange={handleReservationChange}
+                                            className="form-control"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Tanggal Selesai</label>
+                                        <input
+                                            type="date"
+                                            name="endDate"
+                                            value={reservationData.endDate}
                                             onChange={handleReservationChange}
                                             className="form-control"
                                         />
@@ -246,6 +300,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             type="number"
                                             className="form-control"
                                             name="mealCost"
+                                            value={reservationData.mealCost}
                                             onChange={handleReservationChange}
                                             placeholder="Masukkan biaya makan"
                                         />
@@ -256,6 +311,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             type="number"
                                             className="form-control"
                                             name="laundryCost"
+                                            value={reservationData.laundryCost}
                                             onChange={handleReservationChange}
                                             placeholder="Masukkan biaya laundry"
                                         />
@@ -265,7 +321,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         <input
                                             type="number"
                                             className="form-control"
-                                            name="othersCost"
+                                            name="otherCost"
+                                            value={reservationData.otherCost}
                                             onChange={handleReservationChange}
                                             placeholder="Masukkan biaya lainnya"
                                         />
