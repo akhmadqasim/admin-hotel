@@ -26,8 +26,8 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.roomNumber || !form.beginDate || !form.price) {
-            toast.error("Nomor kamar, tanggal mulai, dan harga harus diisi");
+        if (!form.roomNumber || !form.beginDate || !form.endDate) {
+            toast.error("Nomor kamar, tanggal masuk, dan tanggal keluar harus diisi");
             return;
         }
 
@@ -35,11 +35,6 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
         const meal = parseInt(form.mealCost || "0");
         const laundry = parseInt(form.laundryCost || "0");
         const others = parseInt(form.otherCost || "0");
-
-        if (isNaN(priceValue) || priceValue <= 0) {
-            toast.error("Harga harus lebih dari 0");
-            return;
-        }
 
         const start = new Date(form.beginDate);
         const end = form.endDate ? new Date(form.endDate) : new Date(form.beginDate);
@@ -133,7 +128,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 />
                             </div>
                             <div>
-                                <label className="form-label">Tanggal Menginap</label>
+                                <label className="form-label">Tanggal Masuk</label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -144,7 +139,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 />
                             </div>
                             <div>
-                                <label className="form-label">Tanggal Akhir Menginap</label>
+                                <label className="form-label">Tanggal Keluar</label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -158,6 +153,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 <label className="form-label">Harga (Rp)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     className="form-control"
                                     name="price"
                                     value={form.price}
@@ -169,6 +165,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 <label className="form-label">Biaya Makan</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     className="form-control"
                                     name="mealCost"
                                     value={form.mealCost}
@@ -180,6 +177,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 <label className="form-label">Biaya Laundry</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     className="form-control"
                                     name="laundryCost"
                                     value={form.laundryCost}
@@ -191,6 +189,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 <label className="form-label">Biaya Lainnya</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     className="form-control"
                                     name="otherCost"
                                     value={form.otherCost}

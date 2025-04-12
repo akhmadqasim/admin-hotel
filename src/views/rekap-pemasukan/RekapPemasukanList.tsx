@@ -16,20 +16,20 @@ const RekapPemasukanList = ({ data }) => {
     const [items] = useState(JSON.parse(data));
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedMonth, setSelectedMonth] = useState("Semua");
-    const [selectedYear, setSelectedYear] = useState("Semua");
-    const [selectedCategory, setSelectedCategory] = useState("Semua");
+    const [selectedMonth, setSelectedMonth] = useState("Bulan");
+    const [selectedYear, setSelectedYear] = useState("Tahun");
+    const [selectedCategory, setSelectedCategory] = useState("Kategori");
     const [exportFormat, setExportFormat] = useState("excel");
 
     const itemsPerPage = 10;
 
     const months = [
-        "Semua", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Bulan", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
 
     const category = [
-        "Semua", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Lainnya", "Rekap Biaya Reservasi"
+        "Kategori", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Lainnya", "Rekap Biaya Reservasi"
     ];
 
     const uniqueYears = useMemo(() => {
@@ -37,7 +37,7 @@ const RekapPemasukanList = ({ data }) => {
             const date = getSafeDate(item.beginDate);
             return date ? date.getFullYear() : null;
         }).filter(Boolean);
-        return ["Semua", ...Array.from(new Set(years))];
+        return ["Tahun", ...Array.from(new Set(years))];
     }, [items]);
 
     const filteredItems = useMemo(() => {
@@ -48,9 +48,9 @@ const RekapPemasukanList = ({ data }) => {
                 const tanggal = getSafeDate(item.beginDate);
                 const matchesKeyword = item.memberName.toLowerCase().includes(keyword);
                 const matchesMonth =
-                    selectedMonth === "Semua" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
+                    selectedMonth === "Bulan" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
                 const matchesYear =
-                    selectedYear === "Semua" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
+                    selectedYear === "Tahun" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
                 return matchesKeyword && matchesMonth && matchesYear;
             })
             .map((item) => {
@@ -100,7 +100,7 @@ const RekapPemasukanList = ({ data }) => {
             "Bulan": month,
             "Tahun": year,
             "Harga": res.harga,
-            "Kategori": selectedCategory === "Semua" ? "Total" : selectedCategory.replace("Rekap Biaya ", "")
+            "Kategori": selectedCategory === "Kategori" ? "Total" : selectedCategory.replace("Rekap Biaya ", "")
         };
     });
 
@@ -212,7 +212,7 @@ const RekapPemasukanList = ({ data }) => {
                             <th>Tanggal</th>
                             <th>Bulan</th>
                             <th>Tahun</th>
-                            <th>{selectedCategory === "Semua" ? "Total Keseluruhan" : "Harga"}</th>
+                            <th>{selectedCategory === "Kategori" ? "Total Keseluruhan" : "Harga"}</th>
                         </tr>
                         </thead>
                         <tbody>

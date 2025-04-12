@@ -79,9 +79,14 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         }
 
         if (hasReservation) {
-            const { beginDate, endDate, price } = reservationData;
-            if (!beginDate || !endDate || !price) {
-                toast.error("Tanggal dan harga reservasi wajib diisi.");
+            const { roomNumber, beginDate, endDate } = reservationData;
+            if (!roomNumber ||!beginDate || !endDate ) {
+                toast.error("Nomor kamar, tanggal masuk, dan tanggal keluar wajib diisi!");
+                return false;
+            }
+
+            if (new Date(beginDate) > new Date(endDate)) {
+                toast.error("Tanggal masuk tidak boleh setelah tanggal keluar.");
                 return false;
             }
         }
@@ -138,10 +143,10 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     beginDate: formatDateToISOOffset(date),
                     endDate: formatDateToISOOffset(date),
                     roomNumber: roomNumber || undefined,
-                    price: priceValue || undefined,
-                    mealCost: meal || undefined,
-                    laundryCost: laundry || undefined,
-                    otherCost: others || undefined,
+                    price: priceValue,
+                    mealCost: meal,
+                    laundryCost: laundry,
+                    otherCost: others,
                 }));
 
                 const reservationResponses = await Promise.all(
@@ -191,7 +196,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
         return dates;
     };
-
 
     if (!isOpen) return null;
 
@@ -264,7 +268,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label">Tanggal Mulai</label>
+                                        <label className="form-label">Tanggal Masuk</label>
                                         <input
                                             type="date"
                                             name="beginDate"
@@ -274,7 +278,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label">Tanggal Selesai</label>
+                                        <label className="form-label">Tanggal Keluar</label>
                                         <input
                                             type="date"
                                             name="endDate"
@@ -287,6 +291,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         <label className="form-label">Harga Reservasi</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             name="price"
                                             value={reservationData.price}
                                             onChange={handleReservationChange}
@@ -298,6 +303,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         <label className="form-label">Biaya Makan</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             className="form-control"
                                             name="mealCost"
                                             value={reservationData.mealCost}
@@ -309,6 +315,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         <label className="form-label">Biaya Laundry</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             className="form-control"
                                             name="laundryCost"
                                             value={reservationData.laundryCost}
@@ -320,6 +327,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         <label className="form-label">Biaya Lainnya</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             className="form-control"
                                             name="otherCost"
                                             value={reservationData.otherCost}
