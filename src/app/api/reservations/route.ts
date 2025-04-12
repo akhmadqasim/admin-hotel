@@ -42,7 +42,16 @@ export const POST = async (req: NextRequest) => {
         });
 
         const reservation = await prisma.reservation.create({
-            data
+            data: {
+                memberId: data.memberId,
+                beginDate: data.beginDate,
+                endDate: data.endDate,
+                roomNumber: data.roomNumber,
+                price: data.price,
+                mealCost: data.mealCost,
+                laundryCost: data.laundryCost,
+                otherCost: data.otherCost
+            }
         });
 
         return NextResponse.json({
