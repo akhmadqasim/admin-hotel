@@ -1,12 +1,14 @@
 // Next
 import {NextResponse} from "next/server";
-import type {NextRequest} from "next/server";
 
 // Auth
 import {auth} from "@/auth";
 
-export const middleware = async (req: NextRequest) => {
-    const session = await auth();
+export const middleware = async () => {
+  // Development only
+  // const session = true;
+
+  const session = await auth();
 
   if (!session) {
     return NextResponse.json({message: "Unauthorized"}, {status: 401});

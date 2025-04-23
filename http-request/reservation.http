@@ -1,0 +1,37 @@
+### Create a new reservation without booking price, meal cost, laundry cost, and other costs
+POST http://localhost:3000/api/reservations
+Content-Type: application/json
+
+{
+  "memberId": "6808ffbc413bb7e6a42a037e",
+  "checkIn": "2025-01-01T14:00:00Z",
+  "checkOut": "2025-01-10T12:00:00Z",
+  "roomNumber": "1"
+}
+
+### Create a new reservation with booking price, meal cost, laundry cost, and other costs
+POST http://localhost:3000/api/reservations
+Content-Type: application/json
+
+{
+  "memberId": "6808ffbc413bb7e6a42a037e",
+  "checkIn": "2025-01-01T14:00:00Z",
+  "checkOut": "2025-01-10T12:00:00Z",
+  "roomNumber": "1",
+  "roomType": "Deluxe",
+  "roomPrice": 1000000,
+  "mealType": "Breakfast",
+  "mealCost": 50000,
+  "laundryType": "Express",
+  "laundryCost": 20000,
+  "otherType": "Spa",
+  "otherCost": 100000
+}
+
+### Get all reservations
+GET http://localhost:3000/api/reservations
+Content-Type: application/json
+
+### Get a reservation by ID
+GET http://localhost:3000/api/reservations/680900d7413bb7e6a42a0380
+Content-Type: application/json

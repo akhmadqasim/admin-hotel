@@ -1,0 +1,33 @@
+### Get all members
+GET http://localhost:3000/api/members
+Content-Type: application/json
+
+### Get a member by ID
+GET http://localhost:3000/api/members/1
+Content-Type: application/json
+
+### Create a new member
+POST http://localhost:3000/api/members
+Content-Type: application/json
+
+{
+  "nik": "1234567890123456",
+  "name": "Nama Member",
+  "birthDate": "1990-01-01T00:00:00Z",
+  "birthPlace": "Samarinda"
+}
+
+### Update a member by ID
+PUT http://localhost:3000/api/members/1
+Content-Type: application/json
+
+{
+  "nik": "1234567890123456",
+  "name": "Nama Tamu",
+  "birthDate": "2000-12-18T00:00:00Z",
+  "birthPlace": "Jakarta"
+}
+
+### Delete a member by ID
+DELETE http://localhost:3000/api/members/1
+Content-Type: application/json
