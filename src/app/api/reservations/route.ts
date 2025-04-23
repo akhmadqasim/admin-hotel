@@ -77,7 +77,7 @@ export const POST = async (req: NextRequest) => {
         ...(data.mealType ? {
           mealCost: {
             create: {
-              mealType: '',
+              mealType: data.mealType,
               mealCost: data.mealCost
             }
           },
