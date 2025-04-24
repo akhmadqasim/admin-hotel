@@ -1,0 +1,23 @@
+### GET meal by reservation ID
+GET http://localhost:3000/api/reservations/680900d7413bb7e6a42a0380/meal-cost
+
+### Create a new meal
+POST http://localhost:3000/api/reservations/680900d7413bb7e6a42a0380/meal-cost
+Content-Type: application/json
+
+{
+  "mealType": "Breakfast",
+  "mealCost": 50000
+}
+
+### Update a meal by reservation ID
+PATCH http://localhost:3000/api/reservations/680900d7413bb7e6a42a0380/meal-cost/680900d7413bb7e6a42a0382
+Content-Type: application/json
+
+{
+  "mealType": "Lunch",
+  "mealCost": 60000
+}
+
+### Delete a meal by reservation ID
+DELETE http://localhost:3000/api/reservations/680900d7413bb7e6a42a0380/meal-cost/680900d7413bb7e6a42a0382

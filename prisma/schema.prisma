@@ -34,17 +34,61 @@ model Member {
 }
 
 model Reservation {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  memberId    String    @db.ObjectId
-  beginDate   DateTime
-  endDate     DateTime?
-  roomNumber  String?
-  price       Int?
-  mealCost    Int?
-  laundryCost Int?
-  otherCost   Int?
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  memberId     String         @db.ObjectId
+  checkIn      DateTime
+  checkOut     DateTime?
+  roomNumber   String?
+  bookingPrice BookingPrice[]
+  mealCost     MealCost[]
+  laundryCost  LaundryCost[]
+  otherCost    otherCost[]
 
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@map("reservations")
+}
+
+model BookingPrice {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  reservationId String @db.ObjectId
+  roomType      String
+  roomPrice     Int
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("booking_prices")
+}
+
+model MealCost {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  reservationId String @db.ObjectId
+  mealType      String
+  mealCost      Int
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("meal_costs")
+}
+
+model LaundryCost {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  reservationId String @db.ObjectId
+  laundryType   String
+  laundryCost   Int
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("laundry_costs")
+}
+
+model otherCost {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  reservationId String @db.ObjectId
+  costName      String
+  costAmount    Int
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("other_costs")
 }
