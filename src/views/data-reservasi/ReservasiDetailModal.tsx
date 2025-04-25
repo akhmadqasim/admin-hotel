@@ -1,44 +1,58 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 const ReservasiDetailModal = ({ member, onClose }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+    const router = useRouter();
 
     if (!member) return null;
+
+    // Helper buat nge-sum field dari array
+    const sumField = (arr, field) =>
+        Array.isArray(arr) ? arr.reduce((acc, obj) => acc + (obj?.[field] || 0), 0) : 0;
 
     const filtered = useMemo(() => {
         const q = searchQuery.toLowerCase();
         return member.reservations?.filter((res) => {
-            const formattedDate = new Date(res.beginDate).toLocaleDateString("id-ID", {
+            const dateStr = new Date(res.checkIn).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
-                year: "numeric"
+                year: "numeric",
             });
+            const roomNumber = res.roomNumber?.toLowerCase() || "";
+            const price = sumField(res.bookingPrice, "roomPrice").toString();
             return (
-                formattedDate.toLowerCase().includes(q) ||
-                res.price.toString().includes(q) ||
-                res.roomNumber.toLowerCase().includes(q)
+                dateStr.toLowerCase().includes(q) ||
+                roomNumber.includes(q) ||
+                price.includes(q)
             );
         }) || [];
     }, [member.reservations, searchQuery]);
 
-    const totalHarga = filtered.reduce((acc, curr) => acc + (curr.price || 0), 0);
+    const totalHarga = filtered.reduce(
+        (acc, curr) => acc + sumField(curr.bookingPrice, "roomPrice"),
+        0
+    );
 
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handlePageChange = (page) => {
-        if (page < 1 || page > totalPages) return;
-        setCurrentPage(page);
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
     };
 
     return (
         <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-                <div className="modal-content shadow-lg rounded-3 overflow-hidden">
+            <div className="modal-dialog modal-xl modal-dialog-centered">
+                <div className="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
                     <div className="modal-header text-white">
-                        <h6 className="modal-title">Histori Reservasi: {member.name}</h6>
+                        <h5 className="modal-title">Riwayat Reservasi: {member.name}</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <div className="modal-body">
@@ -46,69 +60,109 @@ const ReservasiDetailModal = ({ member, onClose }) => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Cari tanggal atau harga"
+                                placeholder="Cari tanggal, harga, atau kamar"
                                 value={searchQuery}
                                 onChange={(e) => {
                                     setSearchQuery(e.target.value);
-                                    setCurrentPage(1); // reset ke page 1 saat search
+                                    setCurrentPage(1);
                                 }}
                             />
                         </div>
 
                         {paginated.length > 0 ? (
                             <div className="table-responsive" style={{ maxHeight: "400px" }}>
-                                <table className="table table-bordered table-striped align-middle">
-                                    <thead className="table-light sticky-top">
+                                <table className="table table-hover align-middle">
+                                    <thead className="sticky-top bg-light">
                                     <tr>
-                                        <th className="text-center" style={{ width: "60px" }}>No</th>
-                                        <th style={{ width: "150px" }}>Nomor Kamar</th>
-                                        <th style={{ width: "200px" }}>Tanggal</th>
-                                        <th style={{ width: "180px" }}>Biaya Reservasi</th>
-                                        <th style={{ width: "180px" }}>Biaya Makan</th>
-                                        <th style={{ width: "180px" }}>Biaya Laundry</th>
-                                        <th style={{ width: "180px" }}>Biaya Lainnya</th>
+                                        <th className="text-center">No</th>
+                                        <th>Nomor Kamar</th>
+                                        <th>Check-In</th>
+                                        <th>Check-Out</th>
+                                        <th>Reservasi</th>
+                                        <th>Makan</th>
+                                        <th>Laundry</th>
+                                        <th>Lainnya</th>
+                                        <th>Aksi</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {paginated.map((res, idx) => (
-                                        <tr key={idx}>
-                                            <td className="text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                                            <td>{res.roomNumber}</td>
-                                            <td>{new Date(res.beginDate).toLocaleDateString("id-ID", {
-                                                day: "numeric",
-                                                month: "long",
-                                                year: "numeric"
-                                            })}</td>
-                                            <td>Rp {(res.price || 0).toLocaleString("id-ID")}</td>
-                                            <td>Rp {(res.mealCost || 0).toLocaleString("id-ID")}</td>
-                                            <td>Rp {(res.laundryCost || 0).toLocaleString("id-ID")}</td>
-                                            <td>Rp {(res.otherCost || 0).toLocaleString("id-ID")}</td>
-                                        </tr>
-                                    ))}
+                                    {paginated.map((res, idx) => {
+                                        const roomPrice = sumField(res.bookingPrice, "roomPrice");
+                                        const meal = sumField(res.mealCost, "mealCost");
+                                        const laundry = sumField(res.laundryCost, "laundryCost");
+                                        const other = sumField(res.otherCost, "costAmount");
+
+                                        return (
+                                            <tr key={res.id}>
+                                                <td className="text-center">
+                                                    {(currentPage - 1) * itemsPerPage + idx + 1}
+                                                </td>
+                                                <td><strong>{res.roomNumber}</strong></td>
+                                                <td>{new Date(res.checkIn).toLocaleDateString("id-ID", {
+                                                    day: "numeric",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}</td>
+                                                <td>{new Date(res.checkOut).toLocaleDateString("id-ID", {
+                                                    day: "numeric",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}</td>
+                                                <td><span className="badge bg-success">Rp {roomPrice.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-info text-dark">Rp {meal.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-warning text-dark">Rp {laundry.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-secondary">Rp {other.toLocaleString("id-ID")}</span></td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        onClick={() => router.push(`/reservasi/${res.id}/edit`)}
+                                                    >
+                                                        Lihat / Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     </tbody>
-                                    <tfoot>
-                                    <tr>
-                                        <th colSpan="6" className="text-end">Total</th>
-                                        <th className="text-start">Rp {totalHarga.toLocaleString("id-ID")}</th>
-                                    </tr>
+                                    <tfoot className="sticky-bottom bg-light">
+                                        <tr>
+                                            <th colSpan="4" className="text-end">Total</th>
+                                            <th className="text-start">Rp {totalHarga.toLocaleString("id-ID")}</th>
+                                            <th className="text-start">Rp {
+                                                filtered.reduce((acc, curr) => acc + sumField(curr.mealCost, "mealCost"), 0).toLocaleString("id-ID")
+                                            }</th>
+                                            <th className="text-start">Rp {
+                                                filtered.reduce((acc, curr) => acc + sumField(curr.laundryCost, "laundryCost"), 0).toLocaleString("id-ID")
+                                            }</th>
+                                            <th className="text-start">Rp {
+                                                filtered.reduce((acc, curr) => acc + sumField(curr.otherCost, "costAmount"), 0).toLocaleString("id-ID")
+                                            }</th>
+                                            <th></th>
+                                        </tr>
                                     </tfoot>
                                 </table>
                             </div>
                         ) : (
-                            <div className="alert alert-warning mb-0">
-                                Tidak ada hasil yang cocok.
-                            </div>
+                            <div className="alert alert-warning">Tidak ada hasil yang cocok.</div>
                         )}
 
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-between align-items-center mt-3">
                                 <span>Halaman {currentPage} dari {totalPages}</span>
                                 <div className="btn-group">
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                                        &lt; Prev
+                                    <button
+                                        className="btn btn-outline-primary btn-sm"
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        &lt; Sebelumnya
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                                        Next &gt;
+                                    <button
+                                        className="btn btn-outline-primary btn-sm"
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Selanjutnya &gt;
                                     </button>
                                 </div>
                             </div>
