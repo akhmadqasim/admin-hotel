@@ -33,10 +33,21 @@ const ReservasiDetailModal = ({ member, onClose }) => {
         }) || [];
     }, [member.reservations, searchQuery]);
 
-    const totalHarga = filtered.reduce(
+    const totalHargaReservasi = filtered.reduce(
         (acc, curr) => acc + sumField(curr.bookingPrice, "roomPrice"),
-        0
-    );
+        0).toLocaleString("id-ID");
+
+    const totalHargaMakan = filtered.reduce(
+        (acc, curr) => acc + sumField(curr.mealCost, "mealCost"),
+        0).toLocaleString("id-ID");
+
+    const totalHargaLaundry = filtered.reduce(
+        (acc, curr) => acc + sumField(curr.laundryCost, "laundryCost"),
+        0).toLocaleString("id-ID");
+
+    const totalHargaLainnya = filtered.reduce(
+        (acc, curr) => acc + sumField(curr.otherCost, "costAmount"),
+        0).toLocaleString("id-ID")
 
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -127,16 +138,10 @@ const ReservasiDetailModal = ({ member, onClose }) => {
                                     <tfoot className="sticky-bottom bg-light">
                                         <tr>
                                             <th colSpan="4" className="text-end">Total</th>
-                                            <th className="text-start">Rp {totalHarga.toLocaleString("id-ID")}</th>
-                                            <th className="text-start">Rp {
-                                                filtered.reduce((acc, curr) => acc + sumField(curr.mealCost, "mealCost"), 0).toLocaleString("id-ID")
-                                            }</th>
-                                            <th className="text-start">Rp {
-                                                filtered.reduce((acc, curr) => acc + sumField(curr.laundryCost, "laundryCost"), 0).toLocaleString("id-ID")
-                                            }</th>
-                                            <th className="text-start">Rp {
-                                                filtered.reduce((acc, curr) => acc + sumField(curr.otherCost, "costAmount"), 0).toLocaleString("id-ID")
-                                            }</th>
+                                            <th className="text-start">Rp {totalHargaReservasi}</th>
+                                            <th className="text-start">Rp {totalHargaMakan}</th>
+                                            <th className="text-start">Rp {totalHargaLaundry}</th>
+                                            <th className="text-start">Rp {totalHargaLainnya}</th>
                                             <th></th>
                                         </tr>
                                     </tfoot>
