@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-const ReservasiDetailModal = ({ member, onClose }) => {
+const DetailReservationModal = ({ member, onClose }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
@@ -11,7 +11,6 @@ const ReservasiDetailModal = ({ member, onClose }) => {
 
     if (!member) return null;
 
-    // Helper buat nge-sum field dari array
     const sumField = (arr, field) =>
         Array.isArray(arr) ? arr.reduce((acc, obj) => acc + (obj?.[field] || 0), 0) : 0;
 
@@ -120,9 +119,9 @@ const ReservasiDetailModal = ({ member, onClose }) => {
                                                     year: "numeric",
                                                 })}</td>
                                                 <td><span className="badge bg-success">Rp {roomPrice.toLocaleString("id-ID")}</span></td>
-                                                <td><span className="badge bg-info text-dark">Rp {meal.toLocaleString("id-ID")}</span></td>
-                                                <td><span className="badge bg-warning text-dark">Rp {laundry.toLocaleString("id-ID")}</span></td>
-                                                <td><span className="badge bg-secondary">Rp {other.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-success">Rp {meal.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-success">Rp {laundry.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-success">Rp {other.toLocaleString("id-ID")}</span></td>
                                                 <td>
                                                     <button
                                                         className="btn btn-sm btn-outline-primary"
@@ -179,4 +178,4 @@ const ReservasiDetailModal = ({ member, onClose }) => {
     );
 };
 
-export default ReservasiDetailModal;
+export default DetailReservationModal;

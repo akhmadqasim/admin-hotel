@@ -113,12 +113,12 @@ const MasterLayout = ({ children }) => {
         <div>
           <Link href='/' className='sidebar-logo'>
             <img
-              src='assets/images/logo.jpg'
+              src='/assets/images/logo.jpg'
               alt='site logo'
               className='light-logo'
             />
             <img
-              src='assets/images/logo-icon.jpg'
+              src='/assets/images/logo-icon.jpg'
               alt='site logo'
               className='logo-icon'
             />
@@ -217,7 +217,7 @@ const MasterLayout = ({ children }) => {
                     data-bs-toggle='dropdown'
                   >
                     <img
-                      src='assets/images/user.png'
+                      src='/assets/images/user.png'
                       alt='image_user'
                       className='w-40-px h-40-px object-fit-cover rounded-circle'
                     />

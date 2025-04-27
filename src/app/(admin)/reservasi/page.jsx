@@ -18,8 +18,6 @@ const DataReservasiPage = async () => {
     }
   })
 
-  console.log(members)
-
   return (
     <div>
        <ReservasiList data={JSON.stringify(members)}/>

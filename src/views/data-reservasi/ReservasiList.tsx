@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Icon } from "@iconify/react";
-import ReservasiDetailModal from "@/views/data-reservasi/ReservasiDetailModal";
+import DetailReservationModal from "@/views/data-reservasi/DetailReservationModal";
 import AddReservationModal from "@/views/data-reservasi/AddReservationModal";
 
 const ReservasiList = ({ data }) => {
@@ -170,7 +170,7 @@ const ReservasiList = ({ data }) => {
             </div>
 
             {isDetailOpen && selectedMember && (
-                <ReservasiDetailModal
+                <DetailReservationModal
                     member={selectedMember}
                     onClose={() => setIsDetailOpen(false)}
                 />

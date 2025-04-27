@@ -1,18 +1,57 @@
-import {useState} from "react";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
-const AddDataLaundryModal = ({ isOpen, onClose, onSubmit, mealData }) => {
+const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
     const [form, setForm] = useState({
         laundryType: "",
         laundryCost: "",
-    })
+    });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    return(
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/reservations/${reservationId}/laundry-cost`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    laundryType: form.laundryType,
+                    laundryCost: Number(form.laundryCost),
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Gagal menambahkan data laundry");
+            }
+
+            toast.success("Data laundry berhasil ditambahkan!");
+
+            if (onSuccess) {
+                onSuccess({
+                    laundryType: form.laundryType,
+                    laundryCost: Number(form.laundryCost),
+                });
+            }
+
+            onClose();
+            setForm({ laundryType: "", laundryCost: "" });
+        } catch (error) {
+            console.error(error);
+            toast.error("Gagal menambahkan data laundry!");
+        }
+        setIsLoading(false);
+    };
+
+    if (!isOpen) return null;
+
+    return (
         <div
             className="modal show d-block"
             tabIndex={-1}
-            style={{ backgroundColor: "rgba(0,0,0,0.5)"}}
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
             <div className="modal-dialog">
                 <div className="modal-content">
@@ -30,7 +69,7 @@ const AddDataLaundryModal = ({ isOpen, onClose, onSubmit, mealData }) => {
                                     className="form-control"
                                     value={form.laundryType}
                                     disabled={isLoading}
-                                    onChange={(e) => setForm({...form, mealType: e.target.value})}
+                                    onChange={(e) => setForm({ ...form, laundryType: e.target.value })}
                                 />
                             </div>
                             <div className="mb-3">
@@ -41,25 +80,23 @@ const AddDataLaundryModal = ({ isOpen, onClose, onSubmit, mealData }) => {
                                     className="form-control"
                                     value={form.laundryCost}
                                     disabled={isLoading}
-                                    onChange={(e) => setForm({...form, mealCost: e.target.value})}
+                                    onChange={(e) => setForm({ ...form, laundryCost: e.target.value })}
                                 />
                             </div>
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Tutup</button>
-                        <button type="button" className={`btn btn-primary ${isLoading ? "disabled" : ""}`} onClick={() => {
-                            setIsLoading(true);
-                            onSubmit(form);
-                            setIsLoading(false);
-                        }}>
-                            {isLoading ? "Loading..." : "Simpan"}
+                        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isLoading}>
+                            Batal
+                        </button>
+                        <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={isLoading}>
+                            {isLoading ? "Menyimpan..." : "Simpan"}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default AddDataLaundryModal;

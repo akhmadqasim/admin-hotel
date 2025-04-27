@@ -1,12 +1,51 @@
 import {useState} from "react";
+import {toast} from "react-toastify";
 
-const AddDataMealModal = ({ isOpen, onClose, onSubmit, mealData }) => {
+const AddDataMealModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
     const [form, setForm] = useState({
         mealType: "",
         mealCost: "",
     })
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/reservations/${reservationId}/meal-cost`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    reservationId,
+                    mealType: form.mealType,
+                    mealCost: Number(form.mealCost),
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Gagal menambahkan data makan");
+            }
+
+            toast.success("Data makan berhasil ditambahkan!");
+
+            if (onSuccess) {
+                onSuccess({
+                    mealType: form.mealType,
+                    mealCost: Number(form.mealCost),
+                });
+            }
+
+            onClose();
+            setForm({ mealType: "", mealCost: "" });
+        } catch (error) {
+            toast.error("Gagal menambahkan data makan!");
+        }
+        setIsLoading(false);
+    }
+
+    if (!isOpen) return null;
 
     return(
         <div
@@ -47,13 +86,11 @@ const AddDataMealModal = ({ isOpen, onClose, onSubmit, mealData }) => {
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Tutup</button>
-                        <button type="button" className={`btn btn-primary ${isLoading ? "disabled" : ""}`} onClick={() => {
-                            setIsLoading(true);
-                            onSubmit(form);
-                            setIsLoading(false);
-                        }}>
-                            {isLoading ? "Loading..." : "Simpan"}
+                        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isLoading}>
+                            Batal
+                        </button>
+                        <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={isLoading}>
+                            {isLoading ? "Menyimpan..." : "Simpan"}
                         </button>
                     </div>
                 </div>
