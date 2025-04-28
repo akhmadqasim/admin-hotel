@@ -29,7 +29,7 @@ const EditReservationList = ({ reservation }) => {
     const [editDataType, setEditDataType] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    console.log("Reservation Data: ", reservationData);
+// Removed unnecessary debug logging.
 
     const openEditModal = (item, type) => {
         setEditData(item);
