@@ -4,7 +4,14 @@ import ReservasiList from "@/views/data-reservasi/ReservasiList";
 const DataReservasiPage = async () => {
   const members = await prisma.member.findMany({
     include: {
-      reservations: true,
+      reservations: {
+        include: {
+          bookingPrice: true,
+          mealCost: true,
+          laundryCost: true,
+          otherCost: true,
+        }
+      },
       _count: {
         select: {reservations: true}
       }

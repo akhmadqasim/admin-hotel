@@ -3,9 +3,6 @@
 // React
 import React, { useState } from "react";
 
-// Next
-import Link from "next/link";
-
 // Third-party
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";

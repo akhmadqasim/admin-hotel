@@ -12,8 +12,6 @@ const DataTamuPage = async () => {
     }
   })
 
-  console.log(members)
-
   return (
     <div>
       <MemberList data={JSON.stringify(members)} />
