@@ -57,6 +57,24 @@ const ReservasiList = ({ data }) => {
         );
     };
 
+
+    const handleUpdateReservations = (memberId, updatedReservations) => {
+        setMembers((prev) =>
+            prev.map((m) =>
+                m.id === memberId
+                    ? {
+                        ...m,
+                        reservations: updatedReservations,
+                        _count: {
+                            ...m._count,
+                            reservations: updatedReservations.length,
+                        },
+                    }
+                    : m
+            )
+        );
+    }
+
     return (
         <div className="card h-100 p-0 radius-12">
             <div className="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
@@ -173,6 +191,24 @@ const ReservasiList = ({ data }) => {
                 <DetailReservationModal
                     member={selectedMember}
                     onClose={() => setIsDetailOpen(false)}
+                    onDelete={(reservationId) => {
+                        setMembers((prev) =>
+                            prev.map((m) =>
+                                m.id === selectedMember?.id
+                                    ? {
+                                        ...m,
+                                        reservations: m.reservations.filter(
+                                            (res) => res.id !== reservationId
+                                        ),
+                                        _count: {
+                                            ...m._count,
+                                            reservations: (m._count?.reservations || 0) - 1,
+                                        },
+                                    }
+                                    : m
+                            )
+                        );
+                    }}
                 />
             )}
 
@@ -181,7 +217,9 @@ const ReservasiList = ({ data }) => {
                     isOpen={isAddReservasiOpen}
                     onClose={() => setIsAddReservasiOpen(false)}
                     member={selectedMember}
-                    onSubmit={handleAddReservasi}
+                    onSubmit={(newReservation) => {
+                        handleAddReservasi(newReservation);
+                    }}
                 />
             )}
         </div>

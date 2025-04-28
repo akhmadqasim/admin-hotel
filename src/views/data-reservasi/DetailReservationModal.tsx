@@ -1,22 +1,67 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import ConfirmDeleteModal from "@/views/data-reservasi/ConfirmDeleteModal";
 
-const DetailReservationModal = ({ member, onClose }) => {
+const DetailReservationModal = ({ member, onClose, onDelete}) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+    const [reservations, setReservations] = useState(member.reservations || []);
+
     const itemsPerPage = 5;
     const router = useRouter();
 
+    useEffect(() => {
+        setReservations(member.reservations || []);
+    }, [member.reservations]);
+
+
     if (!member) return null;
 
-    const sumField = (arr, field) =>
-        Array.isArray(arr) ? arr.reduce((acc, obj) => acc + (obj?.[field] || 0), 0) : 0;
+    const openConfirmDelete = (reservationId) => {
+        setDeleteTarget(reservationId);
+        setIsConfirmDeleteOpen(true);
+    };
 
-    const filtered = useMemo(() => {
-        const q = searchQuery.toLowerCase();
-        return member.reservations?.filter((res) => {
+    const closeConfirmDelete = () => {
+        setDeleteTarget(null);
+        setIsConfirmDeleteOpen(false);
+    };
+
+    const handleDeleteReservation = async (reservationId) => {
+        try {
+            const response = await fetch(`/api/reservations/${reservationId}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                toast.success("Reservasi berhasil dihapus");
+                setReservations((prev) => prev.filter((res) => res.id !== reservationId));
+                if (onDelete) {
+                    onDelete(reservationId);
+                }
+                closeConfirmDelete();
+            } else {
+                throw new Error("Gagal menghapus reservasi");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Terjadi kesalahan saat menghapus reservasi!");
+        }
+    };
+
+    const sumField = (arr, field) => {
+        if (!Array.isArray(arr)) return 0;
+        return arr.reduce((acc, obj) => acc + (Number(obj?.[field]) || 0), 0);
+    };
+
+    const filteredReservations = useMemo(() => {
+        const query = searchQuery.toLowerCase();
+        return reservations.filter((res) => {
             const dateStr = new Date(res.checkIn).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
@@ -25,31 +70,31 @@ const DetailReservationModal = ({ member, onClose }) => {
             const roomNumber = res.roomNumber?.toLowerCase() || "";
             const price = sumField(res.bookingPrice, "roomPrice").toString();
             return (
-                dateStr.toLowerCase().includes(q) ||
-                roomNumber.includes(q) ||
-                price.includes(q)
+                dateStr.toLowerCase().includes(query) ||
+                roomNumber.includes(query) ||
+                price.includes(query)
             );
-        }) || [];
-    }, [member.reservations, searchQuery]);
+        });
+    }, [reservations, searchQuery]);
 
-    const totalHargaReservasi = filtered.reduce(
-        (acc, curr) => acc + sumField(curr.bookingPrice, "roomPrice"),
-        0).toLocaleString("id-ID");
+    const totals = useMemo(() => {
+        return filteredReservations.reduce(
+            (acc, curr) => ({
+                reservation: acc.reservation + sumField(curr.bookingPrice, "roomPrice"),
+                meal: acc.meal + sumField(curr.mealCost, "mealCost"),
+                laundry: acc.laundry + sumField(curr.laundryCost, "laundryCost"),
+                other: acc.other + sumField(curr.otherCost, "costAmount"),
+            }),
+            { reservation: 0, meal: 0, laundry: 0, other: 0 }
+        );
+    }, [filteredReservations]);
 
-    const totalHargaMakan = filtered.reduce(
-        (acc, curr) => acc + sumField(curr.mealCost, "mealCost"),
-        0).toLocaleString("id-ID");
+    const totalPages = Math.ceil(filteredReservations.length / itemsPerPage);
 
-    const totalHargaLaundry = filtered.reduce(
-        (acc, curr) => acc + sumField(curr.laundryCost, "laundryCost"),
-        0).toLocaleString("id-ID");
-
-    const totalHargaLainnya = filtered.reduce(
-        (acc, curr) => acc + sumField(curr.otherCost, "costAmount"),
-        0).toLocaleString("id-ID")
-
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
-    const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const paginatedReservations = filteredReservations.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
@@ -58,7 +103,7 @@ const DetailReservationModal = ({ member, onClose }) => {
     };
 
     return (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog modal-xl modal-dialog-centered">
                 <div className="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
                     <div className="modal-header text-white">
@@ -79,7 +124,7 @@ const DetailReservationModal = ({ member, onClose }) => {
                             />
                         </div>
 
-                        {paginated.length > 0 ? (
+                        {paginatedReservations.length > 0 ? (
                             <div className="table-responsive" style={{ maxHeight: "400px" }}>
                                 <table className="table table-hover align-middle">
                                     <thead className="sticky-top bg-light">
@@ -96,7 +141,7 @@ const DetailReservationModal = ({ member, onClose }) => {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {paginated.map((res, idx) => {
+                                    {paginatedReservations.map((res, idx) => {
                                         const roomPrice = sumField(res.bookingPrice, "roomPrice");
                                         const meal = sumField(res.mealCost, "mealCost");
                                         const laundry = sumField(res.laundryCost, "laundryCost");
@@ -108,16 +153,8 @@ const DetailReservationModal = ({ member, onClose }) => {
                                                     {(currentPage - 1) * itemsPerPage + idx + 1}
                                                 </td>
                                                 <td><strong>{res.roomNumber}</strong></td>
-                                                <td>{new Date(res.checkIn).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                })}</td>
-                                                <td>{new Date(res.checkOut).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                })}</td>
+                                                <td>{new Date(res.checkIn).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
+                                                <td>{new Date(res.checkOut).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
                                                 <td><span className="badge bg-success">Rp {roomPrice.toLocaleString("id-ID")}</span></td>
                                                 <td><span className="badge bg-success">Rp {meal.toLocaleString("id-ID")}</span></td>
                                                 <td><span className="badge bg-success">Rp {laundry.toLocaleString("id-ID")}</span></td>
@@ -129,20 +166,26 @@ const DetailReservationModal = ({ member, onClose }) => {
                                                     >
                                                         Lihat / Edit
                                                     </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger ms-2"
+                                                        onClick={() => openConfirmDelete(res.id)}
+                                                    >
+                                                        Hapus
+                                                    </button>
                                                 </td>
                                             </tr>
                                         );
                                     })}
                                     </tbody>
-                                    <tfoot className="sticky-bottom bg-light">
-                                        <tr>
-                                            <th colSpan="4" className="text-end">Total</th>
-                                            <th className="text-start">Rp {totalHargaReservasi}</th>
-                                            <th className="text-start">Rp {totalHargaMakan}</th>
-                                            <th className="text-start">Rp {totalHargaLaundry}</th>
-                                            <th className="text-start">Rp {totalHargaLainnya}</th>
-                                            <th></th>
-                                        </tr>
+                                    <tfoot className="sticky-bottom bg-light text-nowrap">
+                                    <tr>
+                                        <th colSpan="4" className="text-end">Total</th>
+                                        <th className="text-start">Rp {totals.reservation.toLocaleString("id-ID")}</th>
+                                        <th className="text-start">Rp {totals.meal.toLocaleString("id-ID")}</th>
+                                        <th className="text-start">Rp {totals.laundry.toLocaleString("id-ID")}</th>
+                                        <th className="text-start">Rp {totals.other.toLocaleString("id-ID")}</th>
+                                        <th></th>
+                                    </tr>
                                     </tfoot>
                                 </table>
                             </div>
@@ -172,6 +215,16 @@ const DetailReservationModal = ({ member, onClose }) => {
                             </div>
                         )}
                     </div>
+
+                    <ConfirmDeleteModal
+                        isOpen={isConfirmDeleteOpen}
+                        onClose={closeConfirmDelete}
+                        onConfirm={() => {
+                            if (deleteTarget) {
+                                handleDeleteReservation(deleteTarget);
+                            }
+                        }}
+                    />
                 </div>
             </div>
         </div>

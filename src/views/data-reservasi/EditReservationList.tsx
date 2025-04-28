@@ -14,7 +14,8 @@ import EditCostModal from "@/views/data-reservasi/EditCostModal";
 const EditReservationList = ({ reservation }) => {
     const [reservationData, setReservationData] = useState({
         ...reservation,
-        roomPrice: reservation.bookingPrice?.[0]?.roomPrice || "", // Tambahkan supaya gampang di-handle
+        roomPrice: reservation.bookingPrice?.[0]?.roomPrice || 0,
+        roomType: reservation.bookingPrice?.[0]?.roomType || "",
     });
 
     const [isAddDataMealOpen, setIsAddDataMealOpen] = useState(false);
@@ -27,6 +28,8 @@ const EditReservationList = ({ reservation }) => {
     const [editData, setEditData] = useState(null);
     const [editDataType, setEditDataType] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    console.log("Reservation Data: ", reservationData);
 
     const openEditModal = (item, type) => {
         setEditData(item);
@@ -59,7 +62,7 @@ const EditReservationList = ({ reservation }) => {
 
     const handleUpdateReservation = async () => {
         try {
-            const response = await fetch(`/api/reservations/${reservationData.id}`, {
+            const updateReservation = await fetch(`/api/reservations/${reservationData.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,12 +71,28 @@ const EditReservationList = ({ reservation }) => {
                     roomNumber: reservationData.roomNumber,
                     checkIn: reservationData.checkIn,
                     checkOut: reservationData.checkOut,
-                    roomPrice: parseInt(reservationData.roomPrice, 10),
                 }),
             });
 
-            if (!response.ok) {
+            if (!updateReservation.ok) {
                 throw new Error("Gagal memperbarui data reservasi");
+            }
+
+            const bookingUpdate = await fetch(`/api/reservations/${reservationData.id}/booking-price/${reservationData.bookingPrice?.[0]?.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    roomType: reservationData.roomType,
+                    roomPrice: parseInt(reservationData.roomPrice),
+                }),
+            })
+
+            console.log(bookingUpdate.body)
+
+            if (!bookingUpdate.ok) {
+                throw new Error("Gagal memperbarui harga reservasi");
             }
 
             toast.success("Data reservasi berhasil diperbarui!");
@@ -181,6 +200,13 @@ const EditReservationList = ({ reservation }) => {
                                     type="date"
                                     value={reservationData.checkOut ? new Date(reservationData.checkOut).toISOString().slice(0, 10) : ""}
                                     onChange={(val) => handleChange("checkOut", val)}
+                                />
+                                <InputWithIcon
+                                    label="Tipe Kamar"
+                                    icon="mdi:door-open"
+                                    type="text"
+                                    value={reservationData.roomType || ""}
+                                    onChange={(val) => handleChange("roomType", val)}
                                 />
                                 <InputWithIcon
                                     label="Harga Reservasi"
@@ -353,7 +379,7 @@ const HistoryCard = ({ title, data = [], typeField, priceField, onAdd, onDelete,
                         ) : (
                             <tr>
                                 <td colSpan="3" className="text-center text-muted">
-                                    Tidak ada data
+                                    Belum ada data
                                 </td>
                             </tr>
                         )}

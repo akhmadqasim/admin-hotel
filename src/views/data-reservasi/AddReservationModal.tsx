@@ -4,9 +4,10 @@ import { toast } from "react-toastify";
 const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
     const [form, setForm] = useState({
         roomNumber: "",
+        roomType: "",
+        roomPrice: "",
         checkIn: "",
         checkOut: "",
-        price: "",
         mealCost: "",
         mealType: "",
         laundryCost: "",
@@ -25,14 +26,12 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
     };
 
     const formatDateToISOOffset = (dateInput) => {
-        // pastikan format `YYYY-MM-DDT00:00:00`
         return new Date(dateInput + "T00:00:00").toISOString();
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // validasi wajib
         if (!form.roomNumber || !form.checkIn || !form.checkOut) {
             toast.error("Nomor kamar, check-in, dan check-out harus diisi");
             return;
@@ -45,26 +44,27 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
             return;
         }
 
-        // build payload untuk satu reservasi
         const payload = {
             memberId: member.id,
             roomNumber: form.roomNumber,
             checkIn: formatDateToISOOffset(form.checkIn),
             checkOut: formatDateToISOOffset(form.checkOut),
-            price: parseInt(form.price || "0"),
+            roomType: form.roomType,
+            roomPrice: parseInt(form.roomPrice || "0"),
+            ...(showMeal && {
+                mealCost: parseInt(form.mealCost || "0"),
+                mealType: form.mealType,
+            }),
+            ...(showLaundry && {
+                laundryCost: parseInt(form.laundryCost || "0"),
+                laundryType: form.laundryType,
+            }),
+            ...(showOther && {
+                otherCost: parseInt(form.otherCost || "0"),
+                otherType: form.otherType,
+            }),
         };
-        if (showMeal) {
-            payload.mealCost = parseInt(form.mealCost || "0");
-            payload.mealType = form.mealType;
-        }
-        if (showLaundry) {
-            payload.laundryCost = parseInt(form.laundryCost || "0");
-            payload.laundryType = form.laundryType;
-        }
-        if (showOther) {
-            payload.otherCost = parseInt(form.otherCost || "0");
-            payload.otherType = form.otherType;
-        }
+
 
         setIsLoading(true);
         try {
@@ -79,13 +79,16 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
             } else {
                 const newReservation = await res.json();
                 toast.success("Reservasi berhasil ditambahkan!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
                 onSubmit(newReservation);
-                // reset form
                 setForm({
                     roomNumber: "",
+                    roomType: "",
+                    roomPrice: "",
                     checkIn: "",
                     checkOut: "",
-                    price: "",
                     mealCost: "",
                     mealType: "",
                     laundryCost: "",
@@ -128,7 +131,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
                             <div>
-                                <label className="form-label">🛏️ Nomor Kamar</label>
+                                <label className="form-label">Nomor Kamar</label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -142,9 +145,41 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 />
                             </div>
 
+                            {/* Tipe Kamar */}
+                            <div>
+                                <label className="form-label">Tipe Kamar (Rp)</label>
+                                <input
+                                    type="text"
+                                    min="0"
+                                    className="form-control"
+                                    name="roomType"
+                                    value={form.roomType}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    placeholder="Contoh: Reguler"
+                                    style={{ fontSize: "16px", minHeight: "44px" }}
+                                />
+                            </div>
+
+                            {/* Harga Reservasi */}
+                            <div>
+                                <label className="form-label">Harga Reservasi (Rp)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="form-control"
+                                    name="roomPrice"
+                                    value={form.roomPrice}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    placeholder="Contoh: 150000"
+                                    style={{ fontSize: "16px", minHeight: "44px" }}
+                                />
+                            </div>
+
                             {/* Check-In */}
                             <div>
-                                <label className="form-label">📅 Check-In</label>
+                                <label className="form-label">Check-In</label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -158,7 +193,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
 
                             {/* Check-Out */}
                             <div>
-                                <label className="form-label">📅 Check-Out</label>
+                                <label className="form-label">Check-Out</label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -166,22 +201,6 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     value={form.checkOut}
                                     onChange={handleChange}
                                     disabled={isLoading}
-                                    style={{ fontSize: "16px", minHeight: "44px" }}
-                                />
-                            </div>
-
-                            {/* Harga Reservasi */}
-                            <div>
-                                <label className="form-label">💰 Harga Reservasi (Rp)</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className="form-control"
-                                    name="price"
-                                    value={form.price}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                    placeholder="Contoh: 150000"
                                     style={{ fontSize: "16px", minHeight: "44px" }}
                                 />
                             </div>
@@ -203,13 +222,13 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     htmlFor="toggleMeal"
                                     style={{ fontSize: "16px" }}
                                 >
-                                    🍽️ Tambah Biaya Makan
+                                    Tambah Biaya Makan
                                 </label>
                             </div>
                             {showMeal && (
                                 <div className="border rounded p-3 bg-light">
                                     <div>
-                                        <label className="form-label">💰 Biaya Makan (Rp)</label>
+                                        <label className="form-label">Biaya Makan (Rp)</label>
                                         <input
                                             type="number"
                                             min="0"
@@ -223,7 +242,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label mt-1">🍽️ Jenis Makanan</label>
+                                        <label className="form-label mt-1">Jenis Makanan</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -253,13 +272,13 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     htmlFor="toggleLaundry"
                                     style={{ fontSize: "16px" }}
                                 >
-                                    🧺 Tambah Biaya Laundry
+                                    Tambah Biaya Laundry
                                 </label>
                             </div>
                             {showLaundry && (
                                 <div className="border rounded p-3 bg-light">
                                     <div>
-                                        <label className="form-label">💰 Biaya Laundry (Rp)</label>
+                                        <label className="form-label">Biaya Laundry (Rp)</label>
                                         <input
                                             type="number"
                                             min="0"
@@ -273,7 +292,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label mt-1">🧺 Jenis Laundry</label>
+                                        <label className="form-label mt-1">Jenis Laundry</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -303,13 +322,13 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     htmlFor="toggleOther"
                                     style={{ fontSize: "16px" }}
                                 >
-                                    💼 Tambah Biaya Lainnya
+                                    Tambah Biaya Lainnya
                                 </label>
                             </div>
                             {showOther && (
                                 <div className="border rounded p-3 bg-light">
                                     <div>
-                                        <label className="form-label">💰 Biaya Lainnya (Rp)</label>
+                                        <label className="form-label">Biaya Lainnya (Rp)</label>
                                         <input
                                             type="number"
                                             min="0"
@@ -323,7 +342,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label mt-1">💼 Jenis Biaya</label>
+                                        <label className="form-label mt-1">Jenis Biaya</label>
                                         <input
                                             type="text"
                                             className="form-control"
