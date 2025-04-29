@@ -4,21 +4,31 @@ import RekapPemasukanList from "@/views/rekap-pemasukan/RekapPemasukanList";
 const RekapPemasukanPage = async () => {
   const members = await prisma.member.findMany({
     include: {
-      reservations: true,
-    },
-  });
+      reservations: {
+        include: {
+          bookingPrice: true,
+          mealCost: true,
+          laundryCost: true,
+          otherCost: true,
+        }
+      },
+      _count: {
+        select: {reservations: true}
+      }
+    }
+  })
 
   const rekapData = members.flatMap((member) =>
     member.reservations.map((reservation) => ({
       id: reservation.id,
       memberName: member.name,
       roomNumber: reservation.roomNumber,
-      beginDate: reservation.beginDate,
-      endDate: reservation.endDate,
-      laundryCost: reservation.laundryCost,
-      otherCost: reservation.otherCost,
-      mealCost: reservation.mealCost,
-      price: reservation.price,
+      checkIn: reservation.checkIn,
+      checkOut: reservation.checkOut,
+      roomPrice: reservation.bookingPrice?.[0]?.roomPrice,
+      mealCost: reservation.mealCost?.map((meal) => meal.mealCost),
+      laundryCost: reservation.laundryCost?.map((laundry) => laundry.laundryCost),
+      otherCost: reservation.otherCost?.map((other) => other.costAmount),
     }))
   );
 

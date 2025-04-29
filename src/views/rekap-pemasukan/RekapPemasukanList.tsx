@@ -7,6 +7,7 @@ import { id } from "date-fns/locale";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+// Utility to parse date safely
 const getSafeDate = (input: string | Date): Date | null => {
     const date = new Date(input);
     return isNaN(date.getTime()) ? null : date;
@@ -34,7 +35,7 @@ const RekapPemasukanList = ({ data }) => {
 
     const uniqueYears = useMemo(() => {
         const years = items.map(item => {
-            const date = getSafeDate(item.beginDate);
+            const date = getSafeDate(item.checkIn);
             return date ? date.getFullYear() : null;
         }).filter(Boolean);
         return ["Tahun", ...Array.from(new Set(years))];
@@ -45,35 +46,32 @@ const RekapPemasukanList = ({ data }) => {
 
         return items
             .filter((item) => {
-                const tanggal = getSafeDate(item.beginDate);
+                const tanggal = getSafeDate(item.checkIn);
                 const matchesKeyword = item.memberName.toLowerCase().includes(keyword);
-                const matchesMonth =
-                    selectedMonth === "Bulan" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
-                const matchesYear =
-                    selectedYear === "Tahun" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
+                const matchesMonth = selectedMonth === "Bulan" || (tanggal && format(tanggal, "MMMM", { locale: id }) === selectedMonth);
+                const matchesYear = selectedYear === "Tahun" || (tanggal && format(tanggal, "yyyy") === String(selectedYear));
                 return matchesKeyword && matchesMonth && matchesYear;
             })
             .map((item) => {
                 let harga = 0;
                 switch (selectedCategory) {
                     case "Rekap Biaya Makan":
-                        harga = item.mealCost ?? 0;
+                        harga = Number(item.mealCost) || 0;
                         break;
                     case "Rekap Biaya Laundry":
-                        harga = item.laundryCost ?? 0;
+                        harga = Number(item.laundryCost) || 0;
                         break;
                     case "Rekap Biaya Lainnya":
-                        harga = item.otherCost ?? 0;
+                        harga = Number(item.otherCost) || 0;
                         break;
                     case "Rekap Biaya Reservasi":
-                        harga = item.price ?? 0;
+                        harga = Number(item.roomPrice) || 0;
                         break;
                     default:
-                        harga =
-                            (item.laundryCost ?? 0) +
-                            (item.mealCost ?? 0) +
-                            (item.otherCost ?? 0) +
-                            (item.price ?? 0);
+                        harga = (Number(item.laundryCost) || 0) +
+                            (Number(item.mealCost) || 0) +
+                            (Number(item.otherCost) || 0) +
+                            (Number(item.roomPrice) || 0);
                         break;
                 }
                 return { ...item, harga };
@@ -86,10 +84,10 @@ const RekapPemasukanList = ({ data }) => {
         currentPage * itemsPerPage
     );
 
-    const totalHarga = filteredItems.reduce((sum, item) => sum + item.harga, 0);
+    const totalHarga = filteredItems.reduce((sum, item) => sum + Number(item.harga || 0), 0);
 
     const exportData = filteredItems.map((res) => {
-        const tanggalObj = getSafeDate(res.beginDate);
+        const tanggalObj = getSafeDate(res.checkIn);
         const formattedDate = tanggalObj ? format(tanggalObj, "yyyy-MM-dd") : "Invalid";
         const month = tanggalObj ? format(tanggalObj, "MMMM", { locale: id }) : "-";
         const year = tanggalObj ? format(tanggalObj, "yyyy") : "-";
@@ -104,6 +102,7 @@ const RekapPemasukanList = ({ data }) => {
         };
     });
 
+    // Export function for Excel
     const exportToExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
@@ -114,6 +113,7 @@ const RekapPemasukanList = ({ data }) => {
         saveAs(dataBlob, "rekap_pemasukan.xlsx");
     };
 
+    // Export function for CSV
     const exportToCSV = () => {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
@@ -121,6 +121,7 @@ const RekapPemasukanList = ({ data }) => {
         saveAs(blob, "rekap_pemasukan.csv");
     };
 
+    // Handle Export based on format
     const handleExport = () => {
         if (exportFormat === "excel") {
             exportToExcel();
@@ -147,6 +148,7 @@ const RekapPemasukanList = ({ data }) => {
                     <Icon icon="ion:search-outline" className="icon" />
                 </form>
             </div>
+
             <div className="card-body p-24">
                 <div className="d-flex gap-3 flex-wrap mb-3">
                     <select
@@ -218,8 +220,7 @@ const RekapPemasukanList = ({ data }) => {
                         <tbody>
                         {paginatedItems.length > 0 ? (
                             paginatedItems.map((res, index) => {
-                                const tanggalObj = getSafeDate(res.beginDate);
-
+                                const tanggalObj = getSafeDate(res.checkIn);
                                 return (
                                     <tr key={res.id}>
                                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
@@ -255,9 +256,9 @@ const RekapPemasukanList = ({ data }) => {
                 </div>
 
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-          <span>
-            Menampilkan {paginatedItems.length} dari {filteredItems.length} entri
-          </span>
+                  <span>
+                    Menampilkan {paginatedItems.length} dari {filteredItems.length} entri
+                  </span>
                     <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                         <li className="page-item">
                             <button
@@ -271,10 +272,9 @@ const RekapPemasukanList = ({ data }) => {
                         {Array.from({ length: totalPages }, (_, i) => (
                             <li className="page-item" key={i}>
                                 <button
-                                    className={`page-link ${
-                                        currentPage === i + 1
-                                            ? "bg-primary-600 text-white"
-                                            : "bg-neutral-200 text-secondary-light"
+                                    className={`page-link ${currentPage === i + 1
+                                        ? "bg-primary-600 text-white"
+                                        : "bg-neutral-200 text-secondary-light"
                                     } fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px`}
                                     onClick={() => setCurrentPage(i + 1)}
                                 >

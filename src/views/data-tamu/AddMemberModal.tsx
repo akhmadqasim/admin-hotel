@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -9,15 +10,22 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         birthPlace: "",
     });
 
+    const [showMeal, setShowMeal] = useState(false);
+    const [showLaundry, setShowLaundry] = useState(false);
+    const [showOther, setShowOther] = useState(false);
     const [hasReservation, setHasReservation] = useState(false);
     const [reservationData, setReservationData] = useState({
         roomNumber: "",
-        beginDate: "",
-        endDate: "",
-        price: "",
+        roomType: "",
+        roomPrice: "",
+        checkIn: "",
+        checkOut: "",
         mealCost: "",
+        mealType: "",
         laundryCost: "",
+        laundryType: "",
         otherCost: "",
+        otherType: "",
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -32,13 +40,20 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         setHasReservation(false);
         setReservationData({
             roomNumber: "",
-            beginDate: "",
-            endDate: "",
-            price: "",
+            roomType: "",
+            roomPrice: "",
+            checkIn: "",
+            checkOut: "",
             mealCost: "",
+            mealType: "",
             laundryCost: "",
+            laundryType: "",
             otherCost: "",
+            otherType: "",
         });
+        setShowMeal(false);
+        setShowLaundry(false);
+        setShowOther(false);
     };
 
     const handleChange = (e) => {
@@ -79,14 +94,14 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         }
 
         if (hasReservation) {
-            const { roomNumber, beginDate, endDate } = reservationData;
-            if (!roomNumber ||!beginDate || !endDate ) {
-                toast.error("Nomor kamar, tanggal masuk, dan tanggal keluar wajib diisi!");
+            const { roomNumber, checkIn, checkOut } = reservationData;
+            if (!roomNumber || !checkIn || !checkOut) {
+                toast.error("Nomor kamar, check-in, dan check-out wajib diisi!");
                 return false;
             }
 
-            if (new Date(beginDate) > new Date(endDate)) {
-                toast.error("Tanggal masuk tidak boleh setelah tanggal keluar.");
+            if (new Date(checkIn) > new Date(checkOut)) {
+                toast.error("Tanggal check-in tidak boleh setelah check-out.");
                 return false;
             }
         }
@@ -98,21 +113,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        const {
-            roomNumber,
-            price,
-            mealCost,
-            laundryCost,
-            otherCost,
-            beginDate,
-            endDate
-        } = reservationData;
-
-        const priceValue = parseInt(price || "0");
-        const meal = parseInt(mealCost || "0");
-        const laundry = parseInt(laundryCost || "0");
-        const others = parseInt(otherCost || "0");
-
         const payload = {
             ...formData,
         };
@@ -120,55 +120,66 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         setIsLoading(true);
 
         try {
-            const res = await fetch("/api/members", {
+            const memberRes = await fetch("/api/members", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
-            const result = await res.json();
+            const memberResult = await memberRes.json();
 
-            if (!res.ok) {
-                toast.error(result.error || "Gagal menambahkan member.");
+            if (!memberRes.ok) {
+                toast.error(memberResult.error || "Gagal menambahkan member.");
                 return;
             }
 
-            const member = result.member;
+            const member = memberResult.member;
 
             if (hasReservation) {
-                const dates = getDatesInRange(beginDate, endDate);
-
-                const reservationPayloads = dates.map((date) => ({
+                const reservationPayload = {
                     memberId: String(member.id),
-                    beginDate: formatDateToISOOffset(date),
-                    endDate: formatDateToISOOffset(date),
-                    roomNumber: roomNumber || undefined,
-                    price: priceValue,
-                    mealCost: meal,
-                    laundryCost: laundry,
-                    otherCost: others,
-                }));
-
-                const reservationResponses = await Promise.all(
-                    reservationPayloads.map((payload) =>
-                        fetch("/api/reservations", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(payload),
-                        }).then((res) => res.json())
-                    )
-                );
-
-                member.reservations = reservationResponses.map((r) => r.reservation);
-                member._count = {
-                    reservations: member.reservations.length,
+                    roomNumber: reservationData.roomNumber,
+                    roomType: reservationData.roomType,
+                    roomPrice: Number(reservationData.roomPrice) || 0,
+                    checkIn: formatDateToISOOffset(reservationData.checkIn),
+                    checkOut: formatDateToISOOffset(reservationData.checkOut),
+                    ...(showMeal && {
+                        mealCost: Number(reservationData.mealCost) || 0,
+                        mealType: reservationData.mealType,
+                    }),
+                    ...(showLaundry && {
+                        laundryCost: Number(reservationData.laundryCost) || 0,
+                        laundryType: reservationData.laundryType,
+                    }),
+                    ...(showOther && {
+                        otherCost: Number(reservationData.otherCost) || 0,
+                        otherType: reservationData.otherType,
+                    }),
                 };
+
+                const reservationRes = await fetch("/api/reservations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(reservationPayload),
+                });
+
+                if (!reservationRes.ok) {
+                    toast.error("Gagal menambahkan reservasi.");
+                    return;
+                }
+
+                const reservationResult = await reservationRes.json();
+                member.reservations = [reservationResult.reservation];
+                member._count = { reservations: 1 };
             } else {
                 member._count = { reservations: 0 };
             }
 
             onSubmit(member);
             toast.success("Member berhasil ditambahkan!");
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
             resetForm();
             onClose();
         } catch (error) {
@@ -179,22 +190,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         }
     };
 
-    const formatDateToISOOffset = (date) => {
-        const tzOffset = "+00:00";
-        return date.toISOString().replace("Z", tzOffset);
-    };
-
-    const getDatesInRange = (start, end) => {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const dates = [];
-
-        while (startDate <= endDate) {
-            dates.push(new Date(startDate));
-            startDate.setDate(startDate.getDate() + 1);
-        }
-
-        return dates;
+    const formatDateToISOOffset = (dateInput) => {
+        return new Date(dateInput + "T00:00:00").toISOString();
     };
 
     if (!isOpen) return null;
@@ -213,21 +210,22 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     </div>
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
-                            {[{ label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
+                            {[
+                                { label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
                                 { label: "Nama", name: "name", placeholder: "Masukkan Nama" },
-                                { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir" }]
-                                .map((field) => (
-                                    <div key={field.name}>
-                                        <label className="form-label">{field.label}</label>
-                                        <input
-                                            name={field.name}
-                                            value={formData[field.name]}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                            placeholder={field.placeholder}
-                                        />
-                                    </div>
-                                ))}
+                                { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir" }
+                            ].map((field) => (
+                                <div key={field.name}>
+                                    <label className="form-label">{field.label}</label>
+                                    <input
+                                        name={field.name}
+                                        value={formData[field.name]}
+                                        onChange={handleChange}
+                                        className="form-control"
+                                        placeholder={field.placeholder}
+                                    />
+                                </div>
+                            ))}
 
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
@@ -267,90 +265,198 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             placeholder="Masukkan nomor kamar"
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="form-label">Tanggal Masuk</label>
+                                        <label className="form-label">Tipe Kamar</label>
                                         <input
-                                            type="date"
-                                            name="beginDate"
-                                            value={reservationData.beginDate}
+                                            type="text"
+                                            name="roomType"
+                                            value={reservationData.roomType}
                                             onChange={handleReservationChange}
                                             className="form-control"
+                                            placeholder="Masukkan tipe kamar"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="form-label">Tanggal Keluar</label>
-                                        <input
-                                            type="date"
-                                            name="endDate"
-                                            value={reservationData.endDate}
-                                            onChange={handleReservationChange}
-                                            className="form-control"
-                                        />
-                                    </div>
+
                                     <div>
                                         <label className="form-label">Harga Reservasi</label>
                                         <input
                                             type="number"
+                                            name="roomPrice"
                                             min="0"
-                                            name="price"
-                                            value={reservationData.price}
+                                            value={reservationData.roomPrice}
                                             onChange={handleReservationChange}
                                             className="form-control"
                                             placeholder="Masukkan harga reservasi"
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="form-label">Biaya Makan</label>
+                                        <label className="form-label">Check-In</label>
                                         <input
-                                            type="number"
-                                            min="0"
-                                            className="form-control"
-                                            name="mealCost"
-                                            value={reservationData.mealCost}
+                                            type="date"
+                                            name="checkIn"
+                                            value={reservationData.checkIn}
                                             onChange={handleReservationChange}
-                                            placeholder="Masukkan biaya makan"
+                                            className="form-control"
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="form-label">Biaya Laundry</label>
+                                        <label className="form-label">Check-Out</label>
                                         <input
-                                            type="number"
-                                            min="0"
-                                            className="form-control"
-                                            name="laundryCost"
-                                            value={reservationData.laundryCost}
+                                            type="date"
+                                            name="checkOut"
+                                            value={reservationData.checkOut}
                                             onChange={handleReservationChange}
-                                            placeholder="Masukkan biaya laundry"
+                                            className="form-control"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="form-label">Biaya Lainnya</label>
+
+                                    <div className="form-check">
                                         <input
-                                            type="number"
-                                            min="0"
-                                            className="form-control"
-                                            name="otherCost"
-                                            value={reservationData.otherCost}
-                                            onChange={handleReservationChange}
-                                            placeholder="Masukkan biaya lainnya"
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="toggleMeal"
+                                            checked={showMeal}
+                                            onChange={() => setShowMeal(!showMeal)}
                                         />
+                                        <label className="form-check-label" htmlFor="toggleMeal">
+                                            Tambah Biaya Makan
+                                        </label>
                                     </div>
+
+                                    {showMeal && (
+                                        <div className="border rounded p-3">
+                                            <div>
+                                                <label className="form-label">Biaya Makan</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className="form-control"
+                                                    name="mealCost"
+                                                    value={reservationData.mealCost}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan biaya makan"
+                                                />
+                                            </div>
+                                            <div className="mt-2">
+                                                <label className="form-label">Jenis Makanan</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="mealType"
+                                                    value={reservationData.mealType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan jenis makanan"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="toggleLaundry"
+                                            checked={showLaundry}
+                                            onChange={() => setShowLaundry(!showLaundry)}
+                                        />
+                                        <label className="form-check-label" htmlFor="toggleLaundry">
+                                            Tambah Biaya Laundry
+                                        </label>
+                                    </div>
+
+                                    {showLaundry && (
+                                        <div className="border rounded p-3">
+                                            <div>
+                                                <label className="form-label">Biaya Laundry</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className="form-control"
+                                                    name="laundryCost"
+                                                    value={reservationData.laundryCost}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan biaya laundry"
+                                                />
+                                            </div>
+                                            <div className="mt-2">
+                                                <label className="form-label">Jenis Laundry</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="laundryType"
+                                                    value={reservationData.laundryType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan jenis laundry"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="toggleOther"
+                                            checked={showOther}
+                                            onChange={() => setShowOther(!showOther)}
+                                        />
+                                        <label className="form-check-label" htmlFor="toggleOther">
+                                            Tambah Biaya Lainnya
+                                        </label>
+                                    </div>
+
+                                    {showOther && (
+                                        <div className="border rounded p-3">
+                                            <div>
+                                                <label className="form-label">Biaya Lainnya</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className="form-control"
+                                                    name="otherCost"
+                                                    value={reservationData.otherCost}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan biaya lainnya"
+                                                />
+                                            </div>
+                                            <div className="mt-2">
+                                                <label className="form-label">Jenis Biaya Lainnya</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="otherType"
+                                                    value={reservationData.otherType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan jenis biaya lainnya"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             )}
-
-                            <button
-                                type="submit"
-                                className="btn btn-success mt-3"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Menambah..." : "Tambah"}
-                            </button>
+                            <div className="d-flex justify-content-end">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary me-2"
+                                    onClick={() => {
+                                        resetForm();
+                                        onClose();
+                                    }}
+                                >
+                                    Batal
+                                </button>
+                                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                                    {isLoading ? "Loading..." : "Simpan"}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     );
-};
-
+}
 export default AddMemberModal;
