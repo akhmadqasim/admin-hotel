@@ -4,7 +4,7 @@ import EditReservationList from "@/views/data-reservasi/EditReservationList";
 const EditReservasiPage = async ({ params }) => {
 
   const reservation = await prisma.reservation.findUnique({
-    where: { id: await params.id},
+    where: { id: params.id},
     include: {
       bookingPrice: true,
       mealCost: true,

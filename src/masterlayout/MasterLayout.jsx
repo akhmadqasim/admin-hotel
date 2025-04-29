@@ -8,9 +8,9 @@ import { signOut } from "next-auth/react"
 
 const MasterLayout = ({ children }) => {
   let pathname = usePathname();
-  let [sidebarActive, seSidebarActive] = useState(false);
+  let [sidebarActive, setSidebarActive] = useState(false);
   let [mobileMenu, setMobileMenu] = useState(false);
-  const location = usePathname(); // Hook to get the current route
+  const location = usePathname();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -24,27 +24,24 @@ const MasterLayout = ({ children }) => {
 
       const isActive = clickedDropdown.classList.contains("open");
 
-      // Close all dropdowns
       const allDropdowns = document.querySelectorAll(".sidebar-menu .dropdown");
       allDropdowns.forEach((dropdown) => {
         dropdown.classList.remove("open");
         const submenu = dropdown.querySelector(".sidebar-submenu");
         if (submenu) {
-          submenu.style.maxHeight = "0px"; // Collapse submenu
+          submenu.style.maxHeight = "0px";
         }
       });
 
-      // Toggle the clicked dropdown
       if (!isActive) {
         clickedDropdown.classList.add("open");
         const submenu = clickedDropdown.querySelector(".sidebar-submenu");
         if (submenu) {
-          submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
+          submenu.style.maxHeight = `${submenu.scrollHeight}px`;
         }
       }
     };
 
-    // Attach click event listeners to all dropdown triggers
     const dropdownTriggers = document.querySelectorAll(
       ".sidebar-menu .dropdown > a, .sidebar-menu .dropdown > Link"
     );
@@ -65,39 +62,42 @@ const MasterLayout = ({ children }) => {
             dropdown.classList.add("open");
             const submenu = dropdown.querySelector(".sidebar-submenu");
             if (submenu) {
-              submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
+              submenu.style.maxHeight = `${submenu.scrollHeight}px`;
             }
           }
         });
       });
     };
 
-    // Open the submenu that contains the active route
     openActiveDropdown();
 
-    // Cleanup event listeners on unmount
     return () => {
       dropdownTriggers.forEach((trigger) => {
         trigger.removeEventListener("click", handleDropdownClick);
       });
     };
-  }, [location.pathname]);
+  }, [location]);
 
-  let sidebarControl = () => {
-    seSidebarActive(!sidebarActive);
+  const sidebarControl = () => {
+    setSidebarActive(!sidebarActive);
   };
 
-  let mobileMenuControl = () => {
+  const mobileMenuControl = () => {
     setMobileMenu(!mobileMenu);
   };
 
+  // Fungsi untuk menutup sidebar saat link diklik
+  const closeSidebar = () => {
+    setSidebarActive(false);
+    setMobileMenu(false);
+  };
+
   return (
-    <section className={mobileMenu ? "overlay active" : "overlay "}>
-      {/* sidebar */}
+    <section className={mobileMenu ? "overlay active" : "overlay"}>
       <aside
         className={
           sidebarActive
-            ? "sidebar active "
+            ? "sidebar active"
             : mobileMenu
               ? "sidebar sidebar-open"
               : "sidebar"
@@ -111,7 +111,7 @@ const MasterLayout = ({ children }) => {
           <Icon icon='radix-icons:cross-2' />
         </button>
         <div>
-          <Link href='/' className='sidebar-logo'>
+          <Link href='/' className='sidebar-logo' onClick={closeSidebar}>
             <img
               src='/assets/images/logo.jpg'
               alt='site logo'
@@ -126,13 +126,12 @@ const MasterLayout = ({ children }) => {
         </div>
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
-
             <li className='sidebar-menu-group-title'>Fitur</li>
-
             <li>
               <Link
                 href='/'
                 className={pathname === "/" ? "active-page" : ""}
+                onClick={closeSidebar}
               >
                 <Icon
                   icon='solar:home-smile-angle-outline'
@@ -145,6 +144,7 @@ const MasterLayout = ({ children }) => {
               <Link
                 href='/tamu'
                 className={pathname === "/tamu" ? "active-page" : ""}
+                onClick={closeSidebar}
               >
                 <Icon icon='mingcute:storage-line' className='menu-icon' />
                 <span>Input Data Tamu Baru</span>
@@ -154,6 +154,7 @@ const MasterLayout = ({ children }) => {
               <Link
                 href='/reservasi'
                 className={pathname === "/reservasi" ? "active-page" : ""}
+                onClick={closeSidebar}
               >
                 <Icon icon='mingcute:storage-line' className='menu-icon' />
                 <span>Rekap Data Tamu</span>
@@ -163,6 +164,7 @@ const MasterLayout = ({ children }) => {
               <Link
                 href='/rekap-pemasukan'
                 className={pathname === "/rekap-pemasukan" ? "active-page" : ""}
+                onClick={closeSidebar}
               >
                 <Icon
                   icon='material-symbols:map-outline'
@@ -175,9 +177,7 @@ const MasterLayout = ({ children }) => {
         </div>
       </aside>
 
-      <main
-        className={sidebarActive ? "dashboard-main active" : "dashboard-main"}
-      >
+      <main className={sidebarActive ? "dashboard-main active" : "dashboard-main"}>
         <div className='navbar-header'>
           <div className='row align-items-center justify-content-between'>
             <div className='col-auto'>
@@ -195,7 +195,7 @@ const MasterLayout = ({ children }) => {
                   ) : (
                     <Icon
                       icon='heroicons:bars-3-solid'
-                      className='icon text-2xl non-active '
+                      className='icon text-2xl non-active'
                     />
                   )}
                 </button>
@@ -245,23 +245,20 @@ const MasterLayout = ({ children }) => {
                           className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
                           onClick={() => signOut()}
                         >
-                          <Icon icon='lucide:power' className='icon text-xl' />{" "}
+                          <Icon icon='lucide:power' className='icon text-xl' />
                           Log Out
                         </a>
                       </li>
                     </ul>
                   </div>
                 </div>
-                {/* Profile dropdown end */}
               </div>
             </div>
           </div>
         </div>
 
-        {/* dashboard-main-body */}
         <div className='dashboard-main-body'>{children}</div>
 
-        {/* Footer section */}
         <footer className='d-footer'>
           <div className='row align-items-center justify-content-between'>
             <div className='col-auto'>
