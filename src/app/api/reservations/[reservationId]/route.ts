@@ -22,7 +22,6 @@ export const GET = async (req: NextRequest, {params}: { params: Promise<{ reserv
             id: reservationId
         },
         include: {
-            bookingPrice: true,
             mealCost: true,
             laundryCost: true,
             otherCost: true,
@@ -63,6 +62,7 @@ export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ rese
             ...(body.checkIn ? {checkIn: new Date(body.checkIn)} : {}),
             ...(body.checkOut ? {checkOut: new Date(body.checkOut)} : {}),
             ...(body.roomNumber ? {roomNumber: body.roomNumber} : {}),
+            ...(body.price ? {price: body.price} : {}),
         });
 
         const reservation = await prisma.reservation.update({

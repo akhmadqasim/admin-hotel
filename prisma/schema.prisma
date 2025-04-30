@@ -39,7 +39,7 @@ model Reservation {
   checkIn      DateTime
   checkOut     DateTime?
   roomNumber   String?
-  bookingPrice BookingPrice[]
+  price        Int?
   mealCost     MealCost[]
   laundryCost  LaundryCost[]
   otherCost    otherCost[]
@@ -47,17 +47,6 @@ model Reservation {
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@map("reservations")
-}
-
-model BookingPrice {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  reservationId String @db.ObjectId
-  roomType      String
-  roomPrice     Int
-
-  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-
-  @@map("booking_prices")
 }
 
 model MealCost {

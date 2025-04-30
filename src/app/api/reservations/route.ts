@@ -12,8 +12,7 @@ const reservationSchema = v.object({
   checkIn: v.optional(v.date()),
   checkOut: v.optional(v.date()),
   roomNumber: v.optional(v.string()),
-  roomType: v.optional(v.string()),
-  roomPrice: v.optional(v.number()),
+  price: v.optional(v.number()),
   mealType: v.optional(v.string()),
   mealCost: v.optional(v.number()),
   laundryType: v.optional(v.string()),
@@ -25,7 +24,6 @@ const reservationSchema = v.object({
 export const GET = async () => {
   const reservations = await prisma.reservation.findMany({
     include: {
-      bookingPrice: true,
       mealCost: true,
       laundryCost: true,
       otherCost: true,
@@ -50,8 +48,7 @@ export const POST = async (req: NextRequest) => {
       ...(body.checkIn ? {checkIn: new Date(body.checkIn)} : {}),
       ...(body.checkOut ? {checkOut: new Date(body.checkOut)} : {}),
       ...(body.roomNumber ? {roomNumber: body.roomNumber} : {}),
-      ...(body.roomType ? {roomType: body.roomType} : {}),
-      ...(body.roomPrice ? {roomPrice: body.roomPrice} : {}),
+      ...(body.price ? {price: body.price} : {}),
       ...(body.mealType ? {mealType: body.mealType} : {}),
       ...(body.mealCost ? {mealCost: body.mealCost} : {}),
       ...(body.laundryType ? {laundryType: body.laundryType} : {}),
@@ -66,14 +63,7 @@ export const POST = async (req: NextRequest) => {
         checkIn: data.checkIn,
         checkOut: data.checkOut,
         roomNumber: data.roomNumber,
-        ...(data.roomType ? {
-          bookingPrice: {
-            create: {
-              roomType: data.roomType,
-              roomPrice: data.roomPrice
-            }
-          }
-        } : {}),
+        price: data.price,
         ...(data.mealType ? {
           mealCost: {
             create: {
