@@ -6,7 +6,6 @@ const RekapPemasukanPage = async () => {
     include: {
       reservations: {
         include: {
-          bookingPrice: true,
           mealCost: true,
           laundryCost: true,
           otherCost: true,
@@ -25,7 +24,7 @@ const RekapPemasukanPage = async () => {
       roomNumber: reservation.roomNumber,
       checkIn: reservation.checkIn,
       checkOut: reservation.checkOut,
-      roomPrice: reservation.bookingPrice?.[0]?.roomPrice,
+      price: reservation.price,
       mealCost: reservation.mealCost?.map((meal) => meal.mealCost),
       laundryCost: reservation.laundryCost?.map((laundry) => laundry.laundryCost),
       otherCost: reservation.otherCost?.map((other) => other.costAmount),

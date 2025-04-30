@@ -26,7 +26,7 @@ const CardCount = () => {
                     setTotalReservation(reservData.reservations.length);
 
                     const totalPrice = reservData.reservations.reduce((acc, reservation) => {
-                        const roomPrice = reservation.bookingPrice?.[0]?.roomPrice || 0;
+                        const price = reservation.price || 0;
 
                         const mealCosts = reservation.mealCost?.reduce((sum, meal) =>
                             sum + (meal.mealCost || 0), 0) || 0;
@@ -37,7 +37,7 @@ const CardCount = () => {
                         const otherCosts = reservation.otherCost?.reduce((sum, other) =>
                             sum + (other.costAmount || 0), 0) || 0;
 
-                        return acc + roomPrice + mealCosts + laundryCosts + otherCosts;
+                        return acc + price + mealCosts + laundryCosts + otherCosts;
                     }, 0);
 
                     setTotalRevenue(totalPrice);

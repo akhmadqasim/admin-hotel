@@ -4,8 +4,7 @@ import { toast } from "react-toastify";
 const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
     const [form, setForm] = useState({
         roomNumber: "",
-        roomType: "",
-        roomPrice: "",
+        price: "",
         checkIn: "",
         checkOut: "",
         mealCost: "",
@@ -49,8 +48,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
             roomNumber: form.roomNumber,
             checkIn: formatDateToISOOffset(form.checkIn),
             checkOut: formatDateToISOOffset(form.checkOut),
-            roomType: form.roomType,
-            roomPrice: parseInt(form.roomPrice || "0"),
+            price: parseInt(form.price || "0"),
             ...(showMeal && {
                 mealCost: parseInt(form.mealCost || "0"),
                 mealType: form.mealType,
@@ -86,7 +84,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                 setForm({
                     roomNumber: "",
                     roomType: "",
-                    roomPrice: "",
+                    price: "",
                     checkIn: "",
                     checkOut: "",
                     mealCost: "",
@@ -145,22 +143,6 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 />
                             </div>
 
-                            {/* Tipe Kamar */}
-                            <div>
-                                <label className="form-label">Tipe Kamar (Rp)</label>
-                                <input
-                                    type="text"
-                                    min="0"
-                                    className="form-control"
-                                    name="roomType"
-                                    value={form.roomType}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                    placeholder="Contoh: Reguler"
-                                    style={{ fontSize: "16px", minHeight: "44px" }}
-                                />
-                            </div>
-
                             {/* Harga Reservasi */}
                             <div>
                                 <label className="form-label">Harga Reservasi (Rp)</label>
@@ -168,8 +150,8 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                     type="number"
                                     min="0"
                                     className="form-control"
-                                    name="roomPrice"
-                                    value={form.roomPrice}
+                                    name="price"
+                                    value={form.price}
                                     onChange={handleChange}
                                     disabled={isLoading}
                                     placeholder="Contoh: 150000"
@@ -181,9 +163,10 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                             <div>
                                 <label className="form-label">Check-In</label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     className="form-control"
                                     name="checkIn"
+                                    placeholder="YYYY-MM-DD"
                                     value={form.checkIn}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -195,9 +178,10 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                             <div>
                                 <label className="form-label">Check-Out</label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     className="form-control"
                                     name="checkOut"
+                                    placeholder="YYYY-MM-DD"
                                     value={form.checkOut}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -242,7 +226,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label mt-1">Jenis Makanan</label>
+                                        <label className="form-label mt-1">Nama Makanan</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -328,7 +312,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                             {showOther && (
                                 <div className="border rounded p-3 bg-light">
                                     <div>
-                                        <label className="form-label">Biaya Lainnya (Rp)</label>
+                                        <label className="form-label">Biaya Tambahan (Rp)</label>
                                         <input
                                             type="number"
                                             min="0"
@@ -342,7 +326,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label mt-1">Jenis Biaya</label>
+                                        <label className="form-label mt-1">Tambahan</label>
                                         <input
                                             type="text"
                                             className="form-control"

@@ -16,8 +16,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     const [hasReservation, setHasReservation] = useState(false);
     const [reservationData, setReservationData] = useState({
         roomNumber: "",
-        roomType: "",
-        roomPrice: "",
+        price: "",
         checkIn: "",
         checkOut: "",
         mealCost: "",
@@ -40,8 +39,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         setHasReservation(false);
         setReservationData({
             roomNumber: "",
-            roomType: "",
-            roomPrice: "",
+            price: "",
             checkIn: "",
             checkOut: "",
             mealCost: "",
@@ -139,8 +137,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                 const reservationPayload = {
                     memberId: String(member.id),
                     roomNumber: reservationData.roomNumber,
-                    roomType: reservationData.roomType,
-                    roomPrice: Number(reservationData.roomPrice) || 0,
+                    price: Number(reservationData.price) || 0,
                     checkIn: formatDateToISOOffset(reservationData.checkIn),
                     checkOut: formatDateToISOOffset(reservationData.checkOut),
                     ...(showMeal && {
@@ -267,24 +264,12 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     </div>
 
                                     <div>
-                                        <label className="form-label">Tipe Kamar</label>
-                                        <input
-                                            type="text"
-                                            name="roomType"
-                                            value={reservationData.roomType}
-                                            onChange={handleReservationChange}
-                                            className="form-control"
-                                            placeholder="Masukkan tipe kamar"
-                                        />
-                                    </div>
-
-                                    <div>
                                         <label className="form-label">Harga Reservasi</label>
                                         <input
                                             type="number"
-                                            name="roomPrice"
+                                            name="price"
                                             min="0"
-                                            value={reservationData.roomPrice}
+                                            value={reservationData.price}
                                             onChange={handleReservationChange}
                                             className="form-control"
                                             placeholder="Masukkan harga reservasi"
@@ -294,26 +279,28 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     <div>
                                         <label className="form-label">Check-In</label>
                                         <input
-                                            type="date"
+                                            type="text"
                                             name="checkIn"
                                             value={reservationData.checkIn}
                                             onChange={handleReservationChange}
                                             className="form-control"
+                                            placeholder="YYYY-MM-DD"
                                         />
                                     </div>
 
                                     <div>
                                         <label className="form-label">Check-Out</label>
                                         <input
-                                            type="date"
+                                            type="text"
                                             name="checkOut"
                                             value={reservationData.checkOut}
                                             onChange={handleReservationChange}
                                             className="form-control"
+                                            placeholder="YYYY-MM-DD"
                                         />
                                     </div>
 
-                                    <div className="form-check">
+                                    <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -328,6 +315,17 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
                                     {showMeal && (
                                         <div className="border rounded p-3">
+                                            <div className="mt-2">
+                                                <label className="form-label">Nama Makanan</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="mealType"
+                                                    value={reservationData.mealType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan jenis makanan"
+                                                />
+                                            </div>
                                             <div>
                                                 <label className="form-label">Biaya Makan</label>
                                                 <input
@@ -340,21 +338,10 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                                     placeholder="Masukkan biaya makan"
                                                 />
                                             </div>
-                                            <div className="mt-2">
-                                                <label className="form-label">Jenis Makanan</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="mealType"
-                                                    value={reservationData.mealType}
-                                                    onChange={handleReservationChange}
-                                                    placeholder="Masukkan jenis makanan"
-                                                />
-                                            </div>
                                         </div>
                                     )}
 
-                                    <div className="form-check">
+                                    <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -369,6 +356,17 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
                                     {showLaundry && (
                                         <div className="border rounded p-3">
+                                            <div className="mt-2">
+                                                <label className="form-label">Jenis Laundry</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="laundryType"
+                                                    value={reservationData.laundryType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan jenis laundry"
+                                                />
+                                            </div>
                                             <div>
                                                 <label className="form-label">Biaya Laundry</label>
                                                 <input
@@ -381,21 +379,10 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                                     placeholder="Masukkan biaya laundry"
                                                 />
                                             </div>
-                                            <div className="mt-2">
-                                                <label className="form-label">Jenis Laundry</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="laundryType"
-                                                    value={reservationData.laundryType}
-                                                    onChange={handleReservationChange}
-                                                    placeholder="Masukkan jenis laundry"
-                                                />
-                                            </div>
                                         </div>
                                     )}
 
-                                    <div className="form-check">
+                                    <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -410,8 +397,19 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
                                     {showOther && (
                                         <div className="border rounded p-3">
+                                            <div className="mt-2">
+                                                <label className="form-label">Tambahan</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="otherType"
+                                                    value={reservationData.otherType}
+                                                    onChange={handleReservationChange}
+                                                    placeholder="Masukkan tambahan lainnya"
+                                                />
+                                            </div>
                                             <div>
-                                                <label className="form-label">Biaya Lainnya</label>
+                                                <label className="form-label">Biaya Tambahan</label>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -420,17 +418,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                                     value={reservationData.otherCost}
                                                     onChange={handleReservationChange}
                                                     placeholder="Masukkan biaya lainnya"
-                                                />
-                                            </div>
-                                            <div className="mt-2">
-                                                <label className="form-label">Jenis Biaya Lainnya</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="otherType"
-                                                    value={reservationData.otherType}
-                                                    onChange={handleReservationChange}
-                                                    placeholder="Masukkan jenis biaya lainnya"
                                                 />
                                             </div>
                                         </div>

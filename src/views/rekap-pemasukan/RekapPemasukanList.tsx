@@ -65,13 +65,13 @@ const RekapPemasukanList = ({ data }) => {
                         harga = Number(item.otherCost) || 0;
                         break;
                     case "Rekap Biaya Reservasi":
-                        harga = Number(item.roomPrice) || 0;
+                        harga = Number(item.price) || 0;
                         break;
                     default:
                         harga = (Number(item.laundryCost) || 0) +
                             (Number(item.mealCost) || 0) +
                             (Number(item.otherCost) || 0) +
-                            (Number(item.roomPrice) || 0);
+                            (Number(item.price) || 0);
                         break;
                 }
                 return { ...item, harga };

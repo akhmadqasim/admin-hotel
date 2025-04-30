@@ -12,6 +12,7 @@ const reservationSchemaPatch = v.object({
     checkIn: v.optional(v.date()),
     checkOut: v.optional(v.date()),
     roomNumber: v.optional(v.string()),
+    price: v.optional(v.number()),
 });
 
 export const GET = async (req: NextRequest, {params}: { params: Promise<{ reservationId: string }> }) => {

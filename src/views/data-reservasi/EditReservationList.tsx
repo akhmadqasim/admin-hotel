@@ -14,8 +14,6 @@ import EditCostModal from "@/views/data-reservasi/EditCostModal";
 const EditReservationList = ({ reservation }) => {
     const [reservationData, setReservationData] = useState({
         ...reservation,
-        roomPrice: reservation.bookingPrice?.[0]?.roomPrice || 0,
-        roomType: reservation.bookingPrice?.[0]?.roomType || "",
     });
 
     const [isAddDataMealOpen, setIsAddDataMealOpen] = useState(false);
@@ -71,28 +69,12 @@ const EditReservationList = ({ reservation }) => {
                     roomNumber: reservationData.roomNumber,
                     checkIn: reservationData.checkIn,
                     checkOut: reservationData.checkOut,
+                    price: reservationData.price,
                 }),
             });
 
             if (!updateReservation.ok) {
                 throw new Error("Gagal memperbarui data reservasi");
-            }
-
-            const bookingUpdate = await fetch(`/api/reservations/${reservationData.id}/booking-price/${reservationData.bookingPrice?.[0]?.id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    roomType: reservationData.roomType,
-                    roomPrice: parseInt(reservationData.roomPrice),
-                }),
-            })
-
-            console.log(bookingUpdate.body)
-
-            if (!bookingUpdate.ok) {
-                throw new Error("Gagal memperbarui harga reservasi");
             }
 
             toast.success("Data reservasi berhasil diperbarui!");
@@ -202,18 +184,12 @@ const EditReservationList = ({ reservation }) => {
                                     onChange={(val) => handleChange("checkOut", val)}
                                 />
                                 <InputWithIcon
-                                    label="Tipe Kamar"
-                                    icon="mdi:door-open"
-                                    type="text"
-                                    value={reservationData.roomType || ""}
-                                    onChange={(val) => handleChange("roomType", val)}
-                                />
-                                <InputWithIcon
                                     label="Harga Reservasi"
                                     icon="mdi:cash-multiple"
                                     type="number"
-                                    value={reservationData.roomPrice || ""}
-                                    onChange={(val) => handleChange("roomPrice", val)}
+                                    value={reservationData.price || ""}
+                                    onChange={(val) => handleChange("price", parseInt(val, 10))}
+
                                 />
                                 <div className="col-12">
                                     <button

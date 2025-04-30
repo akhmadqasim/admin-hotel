@@ -68,7 +68,7 @@ const DetailReservationModal = ({ member, onClose, onDelete}) => {
                 year: "numeric",
             });
             const roomNumber = res.roomNumber?.toLowerCase() || "";
-            const price = sumField(res.bookingPrice, "roomPrice").toString();
+            const price = Number(res.price || 0).toString();
             return (
                 dateStr.toLowerCase().includes(query) ||
                 roomNumber.includes(query) ||
@@ -80,7 +80,7 @@ const DetailReservationModal = ({ member, onClose, onDelete}) => {
     const totals = useMemo(() => {
         return filteredReservations.reduce(
             (acc, curr) => ({
-                reservation: acc.reservation + sumField(curr.bookingPrice, "roomPrice"),
+                reservation: acc.reservation + Number(curr.price || 0),
                 meal: acc.meal + sumField(curr.mealCost, "mealCost"),
                 laundry: acc.laundry + sumField(curr.laundryCost, "laundryCost"),
                 other: acc.other + sumField(curr.otherCost, "costAmount"),
@@ -142,7 +142,7 @@ const DetailReservationModal = ({ member, onClose, onDelete}) => {
                                     </thead>
                                     <tbody>
                                     {paginatedReservations.map((res, idx) => {
-                                        const roomPrice = sumField(res.bookingPrice, "roomPrice");
+                                        const price = Number(res.price || 0);
                                         const meal = sumField(res.mealCost, "mealCost");
                                         const laundry = sumField(res.laundryCost, "laundryCost");
                                         const other = sumField(res.otherCost, "costAmount");
@@ -155,7 +155,7 @@ const DetailReservationModal = ({ member, onClose, onDelete}) => {
                                                 <td><strong>{res.roomNumber}</strong></td>
                                                 <td>{new Date(res.checkIn).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
                                                 <td>{new Date(res.checkOut).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
-                                                <td><span className="badge bg-success">Rp {roomPrice.toLocaleString("id-ID")}</span></td>
+                                                <td><span className="badge bg-success">Rp {price.toLocaleString("id-ID")}</span></td>
                                                 <td><span className="badge bg-success">Rp {meal.toLocaleString("id-ID")}</span></td>
                                                 <td><span className="badge bg-success">Rp {laundry.toLocaleString("id-ID")}</span></td>
                                                 <td><span className="badge bg-success">Rp {other.toLocaleString("id-ID")}</span></td>

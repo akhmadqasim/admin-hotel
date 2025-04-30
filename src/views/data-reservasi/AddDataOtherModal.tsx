@@ -77,6 +77,7 @@ const AddDataOtherModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
                                 <input
                                     type="number"
                                     id="costAmount"
+                                    min="0"
                                     className="form-control"
                                     value={form.costAmount}
                                     disabled={isLoading}

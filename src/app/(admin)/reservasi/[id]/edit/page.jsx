@@ -6,7 +6,6 @@ const EditReservasiPage = async ({ params }) => {
   const reservation = await prisma.reservation.findUnique({
     where: { id: params.id},
     include: {
-      bookingPrice: true,
       mealCost: true,
       laundryCost: true,
       otherCost: true,

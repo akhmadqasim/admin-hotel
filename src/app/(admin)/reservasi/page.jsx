@@ -6,7 +6,6 @@ const DataReservasiPage = async () => {
     include: {
       reservations: {
         include: {
-          bookingPrice: true,
           mealCost: true,
           laundryCost: true,
           otherCost: true,

@@ -77,6 +77,7 @@ const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
                                 <input
                                     type="number"
                                     id="laundryCost"
+                                    min="0"
                                     className="form-control"
                                     value={form.laundryCost}
                                     disabled={isLoading}
