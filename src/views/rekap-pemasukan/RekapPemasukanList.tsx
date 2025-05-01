@@ -30,7 +30,7 @@ const RekapPemasukanList = ({ data }) => {
     ];
 
     const category = [
-        "Kategori", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Lainnya", "Rekap Biaya Reservasi"
+        "Kategori", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Tambahan", "Rekap Biaya Reservasi"
     ];
 
     const uniqueYears = useMemo(() => {
@@ -61,7 +61,7 @@ const RekapPemasukanList = ({ data }) => {
                     case "Rekap Biaya Laundry":
                         harga = Number(item.laundryCost) || 0;
                         break;
-                    case "Rekap Biaya Lainnya":
+                    case "Rekap Biaya Tambahan":
                         harga = Number(item.otherCost) || 0;
                         break;
                     case "Rekap Biaya Reservasi":
