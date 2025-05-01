@@ -87,16 +87,13 @@ const RekapPemasukanList = ({ data }) => {
     const totalHarga = filteredItems.reduce((sum, item) => sum + Number(item.harga || 0), 0);
 
     const exportData = filteredItems.map((res) => {
-        const tanggalObj = getSafeDate(res.checkIn);
-        const formattedDate = tanggalObj ? format(tanggalObj, "yyyy-MM-dd") : "Invalid";
-        const month = tanggalObj ? format(tanggalObj, "MMMM", { locale: id }) : "-";
-        const year = tanggalObj ? format(tanggalObj, "yyyy") : "-";
+        const tanggalCheckIn = getSafeDate(res.checkIn);
+        const tanggalCheckOut = getSafeDate(res.checkOut);
 
         return {
             "Nama Member": res.memberName,
-            "Tanggal": formattedDate,
-            "Bulan": month,
-            "Tahun": year,
+            "Tanggal Check-In": tanggalCheckIn ? format(tanggalCheckIn, "dd-MM-yyyy") : "-",
+            "Tanggal Check-Out": tanggalCheckOut ? format(tanggalCheckOut, "dd-MM-yyyy") : "-",
             "Harga": res.harga,
             "Kategori": selectedCategory === "Kategori" ? "Total" : selectedCategory.replace("Rekap Biaya ", "")
         };
@@ -206,14 +203,13 @@ const RekapPemasukanList = ({ data }) => {
                 </div>
 
                 <div className="table-responsive scroll-sm">
-                    <table className="table bordered-table sm-table mb-0">
+                    <table className="table bordered-table mb-0">
                         <thead>
                         <tr>
                             <th>No</th>
                             <th>Nama Member</th>
-                            <th>Tanggal</th>
-                            <th>Bulan</th>
-                            <th>Tahun</th>
+                            <th>Tanggal Check-In</th>
+                            <th>Tanggal Check-Out</th>
                             <th>{selectedCategory === "Kategori" ? "Total Keseluruhan" : "Harga"}</th>
                         </tr>
                         </thead>
@@ -225,35 +221,29 @@ const RekapPemasukanList = ({ data }) => {
                                     <tr key={res.id}>
                                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                         <td>{res.memberName}</td>
-                                        {tanggalObj ? (
-                                            <>
-                                                <td>{format(tanggalObj, "dd", { locale: id })}</td>
-                                                <td>{format(tanggalObj, "MMMM", { locale: id })}</td>
-                                                <td>{format(tanggalObj, "yyyy", { locale: id })}</td>
-                                            </>
-                                        ) : (
-                                            <td colSpan={3}>Tanggal tidak valid</td>
-                                        )}
+                                        <td>{tanggalObj ? format(tanggalObj, "dd-MM-yyyy") : "-"}</td>
+                                        <td>{res.checkOut ? format(getSafeDate(res.checkOut), "dd-MM-yyyy") : "-"}</td>
                                         <td>Rp {(res.harga ?? 0).toLocaleString("id-ID")}</td>
                                     </tr>
                                 );
                             })
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center text-muted">
+                                <td colSpan="5" className="text-center text-muted">
                                     Tidak ada data ditemukan.
                                 </td>
                             </tr>
                         )}
                         {paginatedItems.length > 0 && (
                             <tr className="font-semibold bg-neutral-100">
-                                <td colSpan={5}>Total Pemasukan</td>
+                                <td colSpan={4}>Total Pemasukan</td>
                                 <td>Rp {totalHarga.toLocaleString("id-ID")}</td>
                             </tr>
                         )}
                         </tbody>
                     </table>
                 </div>
+
 
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
                   <span>

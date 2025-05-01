@@ -153,8 +153,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     memberId: String(member.id),
                     roomNumber: reservationData.roomNumber,
                     price: Number(reservationData.price) || 0,
-                    checkIn: formatDateToISOOffset(reservationData.checkIn),
-                    checkOut: formatDateToISOOffset(reservationData.checkOut),
+                    checkIn: convertToISOFormat(reservationData.checkIn),
+                    checkOut: convertToISOFormat(reservationData.checkOut),
                     ...(showMeal && {
                         mealCost: Number(reservationData.mealCost) || 0,
                         mealType: reservationData.mealType,
@@ -202,9 +202,11 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         }
     };
 
-    const formatDateToISOOffset = (dateInput) => {
-        return new Date(dateInput + "T00:00:00").toISOString();
+    const convertToISOFormat = (date) => {
+        const [day, month, year] = date.split("-");
+        return `${year}-${month}-${day}`;
     };
+
 
     if (!isOpen) return null;
 
@@ -243,11 +245,12 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     name="birthDate"
                                     value={formData.birthDate}
                                     onChange={handleChange}
                                     className="form-control"
+                                    placeholder="DD-MM-YYYY"
                                 />
                             </div>
 
@@ -300,7 +303,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             value={reservationData.checkIn}
                                             onChange={handleReservationChange}
                                             className="form-control"
-                                            placeholder="YYYY-MM-DD"
+                                            placeholder="DD-MM-YYYY"
                                         />
                                     </div>
 
@@ -312,7 +315,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             value={reservationData.checkOut}
                                             onChange={handleReservationChange}
                                             className="form-control"
-                                            placeholder="YYYY-MM-DD"
+                                            placeholder="DD-MM-YYYY"
                                         />
                                     </div>
 

@@ -12,10 +12,20 @@ import ConfirmDeleteModal from "@/views/data-reservasi/ConfirmDeleteModal";
 import EditCostModal from "@/views/data-reservasi/EditCostModal";
 
 const EditReservationList = ({ reservation }) => {
+    const convertToDisplayFormat = (dateStr) => {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
     const [reservationData, setReservationData] = useState({
         ...reservation,
+        checkIn: convertToDisplayFormat(reservation.checkIn),
+        checkOut: convertToDisplayFormat(reservation.checkOut),
     });
-
     const [loading, setLoading] = useState(false);
 
     const [isAddDataMealOpen, setIsAddDataMealOpen] = useState(false);
@@ -58,6 +68,11 @@ const EditReservationList = ({ reservation }) => {
         }));
     };
 
+    const convertToISOFormat = (displayDate) => {
+        const [day, month, year] = displayDate.split("-");
+        return `${year}-${month}-${day}`;
+    };
+
     const handleUpdateReservation = async () => {
         setLoading(true);
         try {
@@ -68,8 +83,8 @@ const EditReservationList = ({ reservation }) => {
                 },
                 body: JSON.stringify({
                     roomNumber: reservationData.roomNumber,
-                    checkIn: reservationData.checkIn,
-                    checkOut: reservationData.checkOut,
+                    checkIn: convertToISOFormat(reservationData.checkIn),
+                    checkOut: convertToISOFormat(reservationData.checkOut),
                     price: reservationData.price,
                 }),
             });
@@ -176,15 +191,15 @@ const EditReservationList = ({ reservation }) => {
                                 <InputWithIcon
                                     label="Check In"
                                     icon="mdi:calendar-range"
-                                    type="date"
-                                    value={reservationData.checkIn ? new Date(reservationData.checkIn).toISOString().slice(0, 10) : ""}
+                                    type="text"
+                                    value={reservationData.checkIn}
                                     onChange={(val) => handleChange("checkIn", val)}
                                 />
                                 <InputWithIcon
                                     label="Check Out"
                                     icon="mdi:calendar-range"
-                                    type="date"
-                                    value={reservationData.checkOut ? new Date(reservationData.checkOut).toISOString().slice(0, 10) : ""}
+                                    type="text"
+                                    value={reservationData.checkOut}
                                     onChange={(val) => handleChange("checkOut", val)}
                                 />
                                 <InputWithIcon
@@ -193,7 +208,6 @@ const EditReservationList = ({ reservation }) => {
                                     type="number"
                                     value={reservationData.price || ""}
                                     onChange={(val) => handleChange("price", parseInt(val, 10))}
-
                                 />
                                 <div className="col-12">
                                     <button
@@ -218,7 +232,7 @@ const EditReservationList = ({ reservation }) => {
                 </div>
             </div>
 
-            {/* History Data */}
+            {/* History */}
             <div className="row gy-4 mt-4">
                 <HistoryCard
                     title="Riwayat Data Makan"
@@ -241,7 +255,7 @@ const EditReservationList = ({ reservation }) => {
                     onEdit={(item) => openEditModal(item, "laundry")}
                 />
                 <HistoryCard
-                    title="Riwayat Data Lainnya"
+                    title="Riwayat Data Tambahan"
                     data={reservationData.otherCost}
                     typeField="costName"
                     priceField="costAmount"
@@ -298,19 +312,20 @@ const EditReservationList = ({ reservation }) => {
     );
 };
 
-const InputWithIcon = ({ label, icon, placeholder = "", type = "text", value, onChange }) => (
+const InputWithIcon = ({ label, icon, placeholder = "", type = "text", value, onChange, disable  }) => (
     <div className="col-12">
         <label className="form-label">{label}</label>
         <div className="input-group">
-      <span className="input-group-text bg-light">
-        <Icon icon={icon} />
-      </span>
+            <span className="input-group-text bg-light">
+                <Icon icon={icon} />
+            </span>
             <input
                 type={type}
                 className="form-control"
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                disabled={disable}
             />
         </div>
     </div>
@@ -344,21 +359,15 @@ const HistoryCard = ({ title, data = [], typeField, priceField, onAdd, onDelete,
                                 <tr key={index}>
                                     <td><strong>{item[typeField]}</strong></td>
                                     <td>
-                      <span className="badge bg-success">
-                        Rp {item[priceField]?.toLocaleString("id-ID")}
-                      </span>
+                                            <span className="badge bg-success">
+                                                Rp {item[priceField]?.toLocaleString("id-ID")}
+                                            </span>
                                     </td>
                                     <td>
-                                        <button
-                                            className="btn btn-sm btn-outline-primary me-1"
-                                            onClick={() => onEdit(item)}
-                                        >
+                                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEdit(item)}>
                                             <Icon icon="material-symbols:edit" />
                                         </button>
-                                        <button
-                                            className="btn btn-sm btn-outline-danger"
-                                            onClick={() => onDelete(dataType, item.id)}
-                                        >
+                                        <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(dataType, item.id)}>
                                             <Icon icon="mingcute:delete-2-line" />
                                         </button>
                                     </td>
@@ -366,9 +375,7 @@ const HistoryCard = ({ title, data = [], typeField, priceField, onAdd, onDelete,
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="3" className="text-center text-muted">
-                                    Belum ada data
-                                </td>
+                                <td colSpan="3" className="text-center text-muted">Belum ada data</td>
                             </tr>
                         )}
                         </tbody>

@@ -37,10 +37,10 @@ const AddDataOtherModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
             });
 
             if (!response.ok) {
-                throw new Error("Gagal menambahkan data lainnya");
+                throw new Error("Gagal menambahkan data tambahan");
             }
 
-            toast.success("Data lainnya berhasil ditambahkan!");
+            toast.success("Data tambahan berhasil ditambahkan!");
 
             if (onSuccess) {
                 onSuccess({
@@ -53,7 +53,7 @@ const AddDataOtherModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
             setForm({ costName: "", costAmount: "" });
             window.location.reload();
         } catch (error) {
-            toast.error("Gagal menambahkan data lainnya!");
+            toast.error("Gagal menambahkan data tambahan!");
         }
         setIsLoading(false);
     };
@@ -69,13 +69,13 @@ const AddDataOtherModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Tambah Data Lainnya</h5>
+                        <h5 className="modal-title">Tambah Data tambahan</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <div className="modal-body">
                         <form>
                             <div className="mb-3">
-                                <label htmlFor="costName" className="form-label">Tipe Lainnya</label>
+                                <label htmlFor="costName" className="form-label">Tambahan</label>
                                 <input
                                     type="text"
                                     id="costName"

@@ -37,6 +37,12 @@ const MemberList = ({ data }) => {
         setSelectedMember(null);
     };
 
+    const convertToDisplayFormat = (date) => {
+        if (!date) return "";
+        const [year, month, day] = date.split("-");
+        return `${day}-${month}-${year}`;
+    };
+
     const handleDeleteMember = async (id) => {
         try {
             const res = await fetch("api/members/" + id, {
@@ -122,7 +128,7 @@ const MemberList = ({ data }) => {
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                 <td>{member.nik}</td>
                                 <td>{member.name}</td>
-                                <td>{new Date(member.birthDate).toLocaleDateString()}</td>
+                                <td>{convertToDisplayFormat(member.birthDate.slice(0, 10))}</td>
                                 <td>{member.birthPlace}</td>
                                 <td>{member._count?.reservations ?? 0}</td>
                                 <td className="text-center">

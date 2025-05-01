@@ -9,14 +9,28 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         birthPlace: "",
     });
     const [isLoading, setIsLoading] = useState(false);
+    const convertToDisplayFormat = (date) => {
+        if (!date) return "";
+        const [year, month, day] = date.split("-");
+        return `${day}-${month}-${year}`;
+    };
+
+    const convertToISOFormat = (date) => {
+        const [day, month, year] = date.split("-");
+        return `${year}-${month}-${day}`;
+    };
+
+    const isValidDateFormat = (dateStr) => {
+        return /^\d{2}-\d{2}-\d{4}$/.test(dateStr);
+    };
 
     useEffect(() => {
         if (member) {
             setFormData({
                 nik: member.nik || "",
-                name: member.name || "",
-                birthDate: member.birthDate?.slice(0, 10) || "", // format YYYY-MM-DD
-                birthPlace: member.birthPlace || "",
+                name: member.name?.toUpperCase() || "",
+                birthDate: convertToDisplayFormat(member.birthDate?.slice(0, 10)) || "",
+                birthPlace: member.birthPlace?.toUpperCase() || "",
             });
         }
     }, [member]);
@@ -24,7 +38,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         let formattedValue = value;
-        if (name === "birthPlace" || name === "name") {
+        if (name === "name" || name === "birthPlace") {
             formattedValue = value.toUpperCase();
         }
 
@@ -37,13 +51,20 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.nik || !formData.name || !formData.birthDate || !formData.birthPlace) {
+        const { nik, name, birthDate, birthPlace } = formData;
+
+        if (!nik || !name || !birthDate || !birthPlace) {
             toast.error("Semua field wajib diisi!");
             return;
         }
 
-        if (!/^\d+$/.test(formData.nik)) {
+        if (!/^\d+$/.test(nik)) {
             toast.error("NIK hanya boleh angka!");
+            return;
+        }
+
+        if (!isValidDateFormat(birthDate)) {
+            toast.error("Tanggal lahir harus dalam format DD-MM-YYYY.");
             return;
         }
 
@@ -53,7 +74,10 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             const res = await fetch(`/api/members/${member.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    birthDate: convertToISOFormat(birthDate),
+                }),
             });
 
             const result = await res.json();
@@ -88,6 +112,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                             <div>
                                 <label className="form-label">NIK</label>
                                 <input
+                                    type="number"
                                     name="nik"
                                     value={formData.nik}
                                     onChange={handleChange}
@@ -98,6 +123,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                             <div>
                                 <label className="form-label">Nama</label>
                                 <input
+                                    type="text"
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
@@ -108,6 +134,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                             <div>
                                 <label className="form-label">Tempat Lahir</label>
                                 <input
+                                    type="text"
                                     name="birthPlace"
                                     value={formData.birthPlace}
                                     onChange={handleChange}
@@ -118,11 +145,12 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     name="birthDate"
                                     value={formData.birthDate}
                                     onChange={handleChange}
                                     className="form-control"
+                                    placeholder="DD-MM-YYYY"
                                 />
                             </div>
                             <button type="submit" className="btn btn-warning mt-3" disabled={isLoading}>
@@ -132,7 +160,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                         Menyimpan...
                                     </>
                                 ) : (
-                                    'Simpan Perubahan'
+                                    "Simpan Perubahan"
                                 )}
                             </button>
                         </form>

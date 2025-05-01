@@ -75,7 +75,7 @@ const AddDataMealModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
                     <div className="modal-body">
                         <form>
                             <div className="mb-3">
-                                <label htmlFor="mealType" className="form-label">Tipe Makan</label>
+                                <label htmlFor="mealType" className="form-label">Nama Makanan</label>
                                 <input
                                     type="text"
                                     id="mealType"
