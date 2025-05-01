@@ -28,6 +28,9 @@ const RekapPemasukanPage = async () => {
       mealCost: reservation.mealCost?.map((meal) => meal.mealCost),
       laundryCost: reservation.laundryCost?.map((laundry) => laundry.laundryCost),
       otherCost: reservation.otherCost?.map((other) => other.costAmount),
+      mealType: reservation.mealCost?.map((meal) => meal.mealType),
+      laundryType: reservation.laundryCost?.map((laundry) => laundry.laundryType),
+      otherType: reservation.otherCost?.map((other) => other.costName),
     }))
   );
 

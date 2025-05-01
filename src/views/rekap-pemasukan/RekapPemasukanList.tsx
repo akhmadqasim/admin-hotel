@@ -30,7 +30,7 @@ const RekapPemasukanList = ({ data }) => {
     ];
 
     const category = [
-        "Kategori", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Tambahan", "Rekap Biaya Reservasi"
+        "Kategori", "Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Tambahan", "Rekap Biaya Reservasi",
     ];
 
     const uniqueYears = useMemo(() => {
@@ -56,13 +56,13 @@ const RekapPemasukanList = ({ data }) => {
                 let harga = 0;
                 switch (selectedCategory) {
                     case "Rekap Biaya Makan":
-                        harga = Number(item.mealCost) || 0;
+                        harga = Array.isArray(item.mealCost) ? item.mealCost.reduce((sum, cost) => sum + Number(cost), 0) : 0;
                         break;
                     case "Rekap Biaya Laundry":
-                        harga = Number(item.laundryCost) || 0;
+                        harga = Array.isArray(item.laundryCost) ? item.laundryCost.reduce((sum, cost) => sum + Number(cost), 0) : 0;
                         break;
                     case "Rekap Biaya Tambahan":
-                        harga = Number(item.otherCost) || 0;
+                        harga = Array.isArray(item.otherCost) ? item.otherCost.reduce((sum, cost) => sum + Number(cost), 0) : 0;
                         break;
                     case "Rekap Biaya Reservasi":
                         harga = Number(item.price) || 0;
@@ -99,7 +99,6 @@ const RekapPemasukanList = ({ data }) => {
         };
     });
 
-    // Export function for Excel
     const exportToExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
@@ -110,7 +109,6 @@ const RekapPemasukanList = ({ data }) => {
         saveAs(dataBlob, "rekap_pemasukan.xlsx");
     };
 
-    // Export function for CSV
     const exportToCSV = () => {
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
@@ -126,6 +124,8 @@ const RekapPemasukanList = ({ data }) => {
             exportToCSV();
         }
     };
+
+    const shouldShowJenis = ["Rekap Biaya Makan", "Rekap Biaya Laundry", "Rekap Biaya Tambahan"].includes(selectedCategory);
 
     return (
         <div className="card h-100 p-0 radius-12">
@@ -203,13 +203,14 @@ const RekapPemasukanList = ({ data }) => {
                 </div>
 
                 <div className="table-responsive scroll-sm">
-                    <table className="table bordered-table mb-0">
+                    <table className="table bordered-table mb-0 ">
                         <thead>
                         <tr>
                             <th>No</th>
                             <th>Nama Member</th>
                             <th>Tanggal Check-In</th>
                             <th>Tanggal Check-Out</th>
+                            {shouldShowJenis && <th>Jenis</th>}
                             <th>{selectedCategory === "Kategori" ? "Total Keseluruhan" : "Harga"}</th>
                         </tr>
                         </thead>
@@ -217,26 +218,37 @@ const RekapPemasukanList = ({ data }) => {
                         {paginatedItems.length > 0 ? (
                             paginatedItems.map((res, index) => {
                                 const tanggalObj = getSafeDate(res.checkIn);
+                                let jenis = "-";
+                                if (selectedCategory === "Rekap Biaya Makan") {
+                                    jenis = Array.isArray(res.mealType) ? res.mealType.join(", ") : "-";
+                                } else if (selectedCategory === "Rekap Biaya Laundry") {
+                                    jenis = Array.isArray(res.laundryType) ? res.laundryType.join(", ") : "-";
+                                } else if (selectedCategory === "Rekap Biaya Tambahan") {
+                                    jenis = Array.isArray(res.otherType) ? res.otherType.join(", ") : "-";
+                                }
+                                console.log("jenis", jenis);
+
                                 return (
                                     <tr key={res.id}>
                                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                         <td>{res.memberName}</td>
                                         <td>{tanggalObj ? format(tanggalObj, "dd-MM-yyyy") : "-"}</td>
                                         <td>{res.checkOut ? format(getSafeDate(res.checkOut), "dd-MM-yyyy") : "-"}</td>
+                                        {shouldShowJenis && <td>{jenis}</td>}
                                         <td>Rp {(res.harga ?? 0).toLocaleString("id-ID")}</td>
                                     </tr>
                                 );
                             })
                         ) : (
                             <tr>
-                                <td colSpan="5" className="text-center text-muted">
+                                <td colSpan={shouldShowJenis ? 6 : 5} className="text-center text-muted">
                                     Tidak ada data ditemukan.
                                 </td>
                             </tr>
                         )}
                         {paginatedItems.length > 0 && (
                             <tr className="font-semibold bg-neutral-100">
-                                <td colSpan={4}>Total Pemasukan</td>
+                                <td colSpan={shouldShowJenis ? 5 : 4}>Total Pemasukan</td>
                                 <td>Rp {totalHarga.toLocaleString("id-ID")}</td>
                             </tr>
                         )}
