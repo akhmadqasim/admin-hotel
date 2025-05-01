@@ -312,7 +312,7 @@ const EditReservationList = ({ reservation }) => {
     );
 };
 
-const InputWithIcon = ({ label, icon, placeholder = "", type = "text", value, onChange, disable  }) => (
+const InputWithIcon = ({ label, icon, placeholder = "", type = "text", value, onChange  }) => (
     <div className="col-12">
         <label className="form-label">{label}</label>
         <div className="input-group">
@@ -325,7 +325,6 @@ const InputWithIcon = ({ label, icon, placeholder = "", type = "text", value, on
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                disabled={disable}
             />
         </div>
     </div>
