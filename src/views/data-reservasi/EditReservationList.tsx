@@ -16,6 +16,8 @@ const EditReservationList = ({ reservation }) => {
         ...reservation,
     });
 
+    const [loading, setLoading] = useState(false);
+
     const [isAddDataMealOpen, setIsAddDataMealOpen] = useState(false);
     const [isAddDataLaundryOpen, setIsAddDataLaundryOpen] = useState(false);
     const [isAddDataOtherOpen, setIsAddDataOtherOpen] = useState(false);
@@ -26,8 +28,6 @@ const EditReservationList = ({ reservation }) => {
     const [editData, setEditData] = useState(null);
     const [editDataType, setEditDataType] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-// Removed unnecessary debug logging.
 
     const openEditModal = (item, type) => {
         setEditData(item);
@@ -59,6 +59,7 @@ const EditReservationList = ({ reservation }) => {
     };
 
     const handleUpdateReservation = async () => {
+        setLoading(true);
         try {
             const updateReservation = await fetch(`/api/reservations/${reservationData.id}`, {
                 method: "PATCH",
@@ -78,8 +79,11 @@ const EditReservationList = ({ reservation }) => {
             }
 
             toast.success("Data reservasi berhasil diperbarui!");
+            window.location.reload();
         } catch (error) {
             toast.error("Gagal memperbarui data reservasi!");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -196,8 +200,16 @@ const EditReservationList = ({ reservation }) => {
                                         type="button"
                                         className="btn btn-success w-100"
                                         onClick={handleUpdateReservation}
+                                        disabled={loading}
                                     >
-                                        Simpan Perubahan
+                                        {loading ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Menyimpan...
+                                            </>
+                                        ) : (
+                                            'Simpan Perubahan'
+                                        )}
                                     </button>
                                 </div>
                             </div>

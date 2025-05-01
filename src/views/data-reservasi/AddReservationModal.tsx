@@ -43,6 +43,26 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
             return;
         }
 
+        if (isNaN(parseInt(form.price)) || parseInt(form.price) < 0) {
+            toast.error("Harga reservasi tidak valid");
+            return;
+        }
+
+        if (showMeal && (!form.mealCost || !form.mealType)) {
+            toast.error("Biaya makan dan jenis makanan harus diisi");
+            return;
+        }
+
+        if (showLaundry && (!form.laundryCost || !form.laundryType)) {
+            toast.error("Biaya laundry dan jenis laundry harus diisi");
+            return;
+        }
+
+        if (showOther && (!form.otherCost || !form.otherType)) {
+            toast.error("Biaya lainnya dan jenis biaya harus diisi");
+            return;
+        }
+
         const payload = {
             memberId: member.id,
             roomNumber: form.roomNumber,
@@ -65,6 +85,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
 
 
         setIsLoading(true);
+
         try {
             const res = await fetch("/api/reservations", {
                 method: "POST",
@@ -347,7 +368,14 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                                 disabled={isLoading}
                                 style={{ fontSize: "16px", minHeight: "44px" }}
                             >
-                                {isLoading ? "Menambah..." : "Tambah Reservasi"}
+                                {isLoading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Menambah...
+                                    </>
+                                ) : (
+                                    'Tambah Data Reservasi'
+                                )}
                             </button>
                         </form>
                     </div>

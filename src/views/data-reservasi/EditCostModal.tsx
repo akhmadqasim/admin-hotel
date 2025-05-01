@@ -7,6 +7,8 @@ const EditCostModal = ({ isOpen, onClose, data, dataType, reservationId, onSucce
     const [typeField, setTypeField] = useState("");
     const [costField, setCostField] = useState("");
 
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         if (data) {
             setTypeField(data[dataType === "meal" ? "mealType" : dataType === "laundry" ? "laundryType" : "costName"] || "");
@@ -19,9 +21,22 @@ const EditCostModal = ({ isOpen, onClose, data, dataType, reservationId, onSucce
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const parsedCost = parseInt(costField, 10);
+
+        if (!typeField || !costField || isNaN(parseInt(costField, 10))) {
+            toast.error("Data tidak valid. Pastikan semua field terisi dengan benar.");
+            return;
+        }
+
+        if (!typeField || !costField || isNaN(parsedCost) || parsedCost < 0) {
+            toast.error("Data tidak valid. Pastikan semua field terisi dengan benar dan harga tidak negatif.");
+            return;
+        }
+
+        setIsLoading(true);
+
         try {
             const endpoint = `/api/reservations/${reservationId}/${dataType}-cost/${data.id}`;
-
             const payload = dataType === "meal"
                 ? { reservationId, mealType: typeField, mealCost: parseInt(costField, 10) }
                 : dataType === "laundry"
@@ -36,7 +51,11 @@ const EditCostModal = ({ isOpen, onClose, data, dataType, reservationId, onSucce
                 body: JSON.stringify(payload),
             });
 
+            console.log("Response status:", response.status);
+
             if (!response.ok) {
+                const errorMessage = await response.text();
+                console.error("Error response:", errorMessage);
                 throw new Error("Gagal update data");
             }
 
@@ -49,9 +68,12 @@ const EditCostModal = ({ isOpen, onClose, data, dataType, reservationId, onSucce
 
             onSuccess(updatedItem);
             onClose();
+            window.location.reload();
         } catch (error) {
             console.error(error);
             toast.error("Gagal memperbarui data");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -94,8 +116,17 @@ const EditCostModal = ({ isOpen, onClose, data, dataType, reservationId, onSucce
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={onClose}>Batal</button>
-                            <button type="submit" className="btn btn-primary">Simpan Perubahan</button>
+                            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isLoading}>Batal</button>
+                            <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                                {isLoading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    "Simpan Perubahan"
+                                )}
+                            </button>
                         </div>
                     </form>
                 </div>

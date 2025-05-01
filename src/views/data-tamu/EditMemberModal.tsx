@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
@@ -126,7 +126,14 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                 />
                             </div>
                             <button type="submit" className="btn btn-warning mt-3" disabled={isLoading}>
-                                {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
+                                {isLoading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    'Simpan Perubahan'
+                                )}
                             </button>
                         </form>
                     </div>

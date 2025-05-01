@@ -32,6 +32,22 @@ const DetailReservationModal = ({ member, onClose, onDelete}) => {
         setIsConfirmDeleteOpen(false);
     };
 
+    const fetchUpdateReservations = async (reservationId) => {
+        try {
+            const response = await fetch(`/api/reservations/${reservationId}`);
+            if (!response.ok) {
+                throw new Error("Gagal mengambil data reservasi");
+            }
+            const data = await response.json();
+            setReservations((prev) =>
+                prev.map((res) => (res.id === reservationId ? { ...res, ...data } : res))
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error("Terjadi kesalahan saat memperbarui data reservasi!");
+        }
+    }
+
     const handleDeleteReservation = async (reservationId) => {
         try {
             const response = await fetch(`/api/reservations/${reservationId}`, {

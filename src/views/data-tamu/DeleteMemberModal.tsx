@@ -34,7 +34,14 @@ const DeleteMemberModal = ({ isOpen, onClose, member, onConfirm }) => {
                             Batal
                         </button>
                         <button className="btn btn-danger" onClick={handleConfirm} disabled={isLoading}>
-                            {isLoading ? "Menghapus..." : "Hapus"}
+                            {isLoading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Menghapus...
+                                </>
+                            ) : (
+                                'Hapus Member'
+                            )}
                         </button>
                     </div>
                 </div>

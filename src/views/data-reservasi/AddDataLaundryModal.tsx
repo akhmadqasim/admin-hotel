@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
@@ -10,7 +10,19 @@ const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async () => {
+
+        if (!form.laundryType || !form.laundryCost) {
+            toast.error("Data tidak valid. Pastikan semua field terisi dengan benar.");
+            return;
+        }
+
+        if (isNaN(Number(form.laundryCost)) || Number(form.laundryCost) < 0) {
+            toast.error("Data tidak valid. Pastikan semua field terisi dengan benar dan harga tidak negatif.");
+            return;
+        }
+
         setIsLoading(true);
+
         try {
             const response = await fetch(`/api/reservations/${reservationId}/laundry-cost`, {
                 method: "POST",
@@ -38,6 +50,7 @@ const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
 
             onClose();
             setForm({ laundryType: "", laundryCost: "" });
+            window.location.reload();
         } catch (error) {
             console.error(error);
             toast.error("Gagal menambahkan data laundry!");
@@ -91,7 +104,14 @@ const AddDataLaundryModal = ({ isOpen, onClose, reservationId, onSuccess }) => {
                             Batal
                         </button>
                         <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={isLoading}>
-                            {isLoading ? "Menyimpan..." : "Simpan"}
+                            {isLoading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                'Tambah Data Laundry'
+                            )}
                         </button>
                     </div>
                 </div>

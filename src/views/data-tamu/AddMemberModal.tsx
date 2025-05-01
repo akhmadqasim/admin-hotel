@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
@@ -102,6 +102,21 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                 toast.error("Tanggal check-in tidak boleh setelah check-out.");
                 return false;
             }
+        }
+
+        if (showMeal && (!reservationData.mealCost || !reservationData.mealType)) {
+            toast.error("Biaya dan jenis makanan wajib diisi!");
+            return false;
+        }
+
+        if (showLaundry && (!reservationData.laundryCost || !reservationData.laundryType)) {
+            toast.error("Biaya dan jenis laundry wajib diisi!");
+            return false;
+        }
+
+        if (showOther && (!reservationData.otherCost || !reservationData.otherType)) {
+            toast.error("Biaya dan jenis lainnya wajib diisi!");
+            return false;
         }
 
         return true;
@@ -217,6 +232,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     <input
                                         name={field.name}
                                         value={formData[field.name]}
+                                        type={field.name === "nik" ? "number" : "text"}
                                         onChange={handleChange}
                                         className="form-control"
                                         placeholder={field.placeholder}
@@ -436,7 +452,14 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     Batal
                                 </button>
                                 <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                                    {isLoading ? "Loading..." : "Simpan"}
+                                    {isLoading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Menambah...
+                                        </>
+                                    ) : (
+                                        'Tambah Member'
+                                    )}
                                 </button>
                             </div>
                         </form>
