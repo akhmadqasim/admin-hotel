@@ -22,21 +22,25 @@ const reservationSchema = v.object({
 });
 
 export const GET = async () => {
-  const reservations = await prisma.reservation.findMany({
-    include: {
-      mealCost: true,
-      laundryCost: true,
-      otherCost: true,
+  try {
+    const reservations = await prisma.reservation.findMany({
+      include: {
+        mealCost: true,
+        laundryCost: true,
+        otherCost: true,
+      }
+    });
+
+    if (!reservations) {
+      return NextResponse.json({message: 'No reservations found'}, {status: 404})
     }
-  });
 
-  if (!reservations) {
-    return NextResponse.json({message: 'No reservations found'}, {status: 404})
+    return NextResponse.json({
+      reservations
+    });
+  } catch (e) {
+    return NextResponse.json({message: "Internal server error"}, {status: 500});
   }
-
-  return NextResponse.json({
-    reservations
-  });
 }
 
 export const POST = async (req: NextRequest) => {
@@ -95,6 +99,13 @@ export const POST = async (req: NextRequest) => {
       reservation
     });
   } catch (e) {
+    prisma.errorLog.create({
+      data: {
+        message: e.message,
+        stack: e.stack
+      }
+    })
+
     return NextResponse.json({message: "Invalid data"}, {status: 400});
   }
 }

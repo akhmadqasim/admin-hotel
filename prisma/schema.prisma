@@ -26,6 +26,7 @@ model Member {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   nik          String        @unique
   name         String
+  address      String?
   birthDate    DateTime
   birthPlace   String
   reservations Reservation[]
@@ -34,15 +35,15 @@ model Member {
 }
 
 model Reservation {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
-  memberId     String         @db.ObjectId
-  checkIn      DateTime
-  checkOut     DateTime?
-  roomNumber   String?
-  price        Int?
-  mealCost     MealCost[]
-  laundryCost  LaundryCost[]
-  otherCost    otherCost[]
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  memberId    String        @db.ObjectId
+  checkIn     DateTime
+  checkOut    DateTime?
+  roomNumber  String?
+  price       Int?
+  mealCost    MealCost[]
+  laundryCost LaundryCost[]
+  otherCost   otherCost[]
 
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
@@ -80,4 +81,13 @@ model otherCost {
   reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 
   @@map("other_costs")
+}
+
+model ErrorLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  message   String
+  stack     String
+  createdAt DateTime @default(now())
+
+  @@map("error_logs")
 }

@@ -5,73 +5,119 @@ import {NextRequest, NextResponse} from "next/server";
 import {prisma} from "@/helper/prisma";
 
 export const GET = async (req: NextRequest, {params}: { params: Promise<{ memberId: string }> }) => {
-  const {memberId} = await params;
+  try {
+    const {memberId} = await params;
 
-  const member = await prisma.member.findUnique({
-    where: {
-      id: memberId
+    const member = await prisma.member.findUnique({
+      where: {
+        id: memberId
+      }
+    });
+
+    if (member) {
+      return NextResponse.json({message: 'Member not found'}, {status: 404})
     }
-  });
 
-  if (member) {
-    return NextResponse.json({message: 'Member not found'}, {status: 404})
+    return NextResponse.json({member})
+  } catch (e) {
+    prisma.errorLog.create({
+      data: {
+        message: e.message,
+        stack: e.stack,
+      }
+    })
+
+    return NextResponse.json({message: 'Internal server error'}, {status: 500})
   }
-
-  return NextResponse.json({member})
 };
 
 export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ memberId: string }> }) => {
-  const {memberId} = await params;
+  try {
+    const {memberId} = await params;
 
-  const result = await prisma.member.delete({
-    where: {
-      id: memberId
+    const result = await prisma.member.delete({
+      where: {
+        id: memberId
+      }
+    })
+
+    if (!result) {
+      return NextResponse.json({message: 'Member not found'}, {status: 404})
     }
-  })
 
-  if (!result) {
-    return NextResponse.json({message: 'Member not found'}, {status: 404})
+    return new NextResponse(null, {status: 204});
+  } catch (e) {
+    prisma.errorLog.create({
+      data: {
+        message: e.message,
+        stack: e.stack,
+      }
+    })
+
+    return NextResponse.json({message: 'Internal server error'}, {status: 500})
   }
-
-  return new NextResponse(null, {status: 204});
 };
 
 export const PUT = async (req: NextRequest, {params}: { params: Promise<{ memberId: string }> }) => {
-  const {memberId} = await params;
+  try {
+    const {memberId} = await params;
 
-  const body = await req.json();
+    const body = await req.json();
 
-  const member = await prisma.member.update({
-    where: {
-      id: memberId
-    },
-    data: {
-      nik: body.nik,
-      name: body.name,
-      birthDate: body.birthDate,
-      birthPlace: body.birthPlace
-    }
-  });
+    const member = await prisma.member.update({
+      where: {
+        id: memberId
+      },
+      data: {
+        nik: body.nik,
+        name: body.name,
+        address: body.address,
+        birthDate: body.birthDate,
+        birthPlace: body.birthPlace
+      }
+    });
 
-  return NextResponse.json({member});
+    return NextResponse.json({member});
+  } catch (e) {
+    prisma.errorLog.create({
+      data: {
+        message: e.message,
+        stack: e.stack,
+      }
+    })
+
+    return NextResponse.json({message: 'Internal server error'}, {status: 500})
+  }
 }
 
 export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ memberId: string }> }) => {
-  const {memberId} = await params;
+  try {
+    const {memberId} = await params;
 
-  const body = await req.json();
+    const body = await req.json();
 
-  const member = await prisma.member.update({
-    where: {
-      id: memberId
-    },
-    data: {
-      nik: body.nik.toString(),
-      name: body.name,
-      birthDate: new Date(body.birthDate),
-      birthPlace: body.birthPlace
-    }
-  });
+    const member = await prisma.member.update({
+      where: {
+        id: memberId
+      },
+      data: {
+        ...(body.nik ? {nik: body.nik.toString()} : {}),
+        ...(body.name ? {name: body.name} : {}),
+        ...(body.address ? {address: body.address} : {}),
+        ...(body.birthDate ? {birthDate: body.birthDate} : {}),
+        ...(body.birthPlace ? {birthPlace: body.birthPlace} : {}),
+      }
+    });
 
-  return NextResponse.json({member});
+    return NextResponse.json({member});
+  } catch (e) {
+    prisma.errorLog.create({
+      data: {
+        message: e.message,
+        stack: e.stack,
+      }
+    })
+
+    return NextResponse.json({message: 'Internal server error'}, {status: 500})
+  }
 }

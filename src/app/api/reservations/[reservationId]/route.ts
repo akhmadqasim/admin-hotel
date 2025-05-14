@@ -16,40 +16,62 @@ const reservationSchemaPatch = v.object({
 });
 
 export const GET = async (req: NextRequest, {params}: { params: Promise<{ reservationId: string }> }) => {
-    const {reservationId} = await params;
+    try {
+        const {reservationId} = await params;
 
-    const reservation = await prisma.reservation.findUnique({
-        where: {
-            id: reservationId
-        },
-        include: {
-            mealCost: true,
-            laundryCost: true,
-            otherCost: true,
+        const reservation = await prisma.reservation.findUnique({
+            where: {
+                id: reservationId
+            },
+            include: {
+                mealCost: true,
+                laundryCost: true,
+                otherCost: true,
+            }
+        });
+
+        if (!reservation) {
+            return NextResponse.json({message: 'Reservation not found'}, {status: 404})
         }
-    });
 
-    if (!reservation) {
-        return NextResponse.json({message: 'Reservation not found'}, {status: 404})
+        return NextResponse.json({reservation})
+    } catch (e) {
+        prisma.errorLog.create({
+            data: {
+                message: e.message,
+                stack: e.stack,
+            }
+        })
+
+        return NextResponse.json({message: 'Internal server error'}, {status: 500})
     }
-
-    return NextResponse.json({reservation})
 }
 
 export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ reservationId: string }> }) => {
-    const {reservationId} = await params;
+    try {
+        const {reservationId} = await params;
 
-    const result = await prisma.reservation.delete({
-        where: {
-            id: reservationId
+        const result = await prisma.reservation.delete({
+            where: {
+                id: reservationId
+            }
+        })
+
+        if (!result) {
+            return NextResponse.json({message: 'Reservation not found'}, {status: 404})
         }
-    })
 
-    if (!result) {
-        return NextResponse.json({message: 'Reservation not found'}, {status: 404})
+        return new NextResponse(null, {status: 204});
+    } catch (e) {
+        prisma.errorLog.create({
+            data: {
+                message: e.message,
+                stack: e.stack,
+            }
+        })
+
+        return NextResponse.json({message: 'Internal server error'}, {status: 500})
     }
-
-    return new NextResponse(null, {status: 204});
 };
 
 export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ reservationId: string }> }) => {
@@ -75,6 +97,13 @@ export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ rese
 
         return NextResponse.json({reservation});
     } catch (e) {
+        prisma.errorLog.create({
+            data: {
+                message: e.message,
+                stack: e.stack,
+            }
+        })
+
         return NextResponse.json({message: "Invalid data"}, {status: 400});
     }
 }
