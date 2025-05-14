@@ -23,7 +23,7 @@ export const GET = async (req: NextRequest, {params}: { params: Promise<{ member
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
@@ -50,7 +50,7 @@ export const DELETE = async (req: NextRequest, {params}: { params: Promise<{ mem
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
@@ -82,7 +82,7 @@ export const PUT = async (req: NextRequest, {params}: { params: Promise<{ member
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
@@ -114,7 +114,7 @@ export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ memb
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 

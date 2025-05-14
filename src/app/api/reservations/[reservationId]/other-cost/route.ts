@@ -23,7 +23,7 @@ export const GET = async (req: NextRequest, {params}: { params: Promise<{ reserv
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
@@ -53,7 +53,7 @@ export const POST = async (req: NextRequest, {params}: { params: Promise<{ reser
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 

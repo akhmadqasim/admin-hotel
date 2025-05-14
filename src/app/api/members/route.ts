@@ -26,7 +26,7 @@ export const GET = async () => {
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
@@ -57,7 +57,7 @@ export const POST = async (req: NextRequest) => {
     prisma.errorLog.create({
       data: {
         message: e.message,
-        stack: e.stack,
+        stack: e,
       }
     })
 
