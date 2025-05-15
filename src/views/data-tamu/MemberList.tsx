@@ -116,6 +116,7 @@ const MemberList = ({ data }) => {
                             <th>No</th>
                             <th>NIK</th>
                             <th>Nama</th>
+                            <th>Alamat</th>
                             <th>Tanggal Lahir</th>
                             <th>Tempat Lahir</th>
                             <th>Reservasi</th>
@@ -128,6 +129,7 @@ const MemberList = ({ data }) => {
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                 <td>{member.nik}</td>
                                 <td>{member.name}</td>
+                                <td>{member.address}</td>
                                 <td>{convertToDisplayFormat(member.birthDate.slice(0, 10))}</td>
                                 <td>{member.birthPlace}</td>
                                 <td>{member._count?.reservations ?? 0}</td>

@@ -12,19 +12,16 @@ import ConfirmDeleteModal from "@/views/data-reservasi/ConfirmDeleteModal";
 import EditCostModal from "@/views/data-reservasi/EditCostModal";
 
 const EditReservationList = ({ reservation }) => {
-    const convertToDisplayFormat = (dateStr) => {
+    const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const date = new Date(dateStr);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return date.toISOString().split("T")[0];
     };
 
     const [reservationData, setReservationData] = useState({
         ...reservation,
-        checkIn: convertToDisplayFormat(reservation.checkIn),
-        checkOut: convertToDisplayFormat(reservation.checkOut),
+        checkIn: formatDate(reservation.checkIn),
+        checkOut: formatDate(reservation.checkOut),
     });
     const [loading, setLoading] = useState(false);
 
@@ -68,11 +65,6 @@ const EditReservationList = ({ reservation }) => {
         }));
     };
 
-    const convertToISOFormat = (displayDate) => {
-        const [day, month, year] = displayDate.split("-");
-        return `${year}-${month}-${day}`;
-    };
-
     const handleUpdateReservation = async () => {
         setLoading(true);
         try {
@@ -83,8 +75,8 @@ const EditReservationList = ({ reservation }) => {
                 },
                 body: JSON.stringify({
                     roomNumber: reservationData.roomNumber,
-                    checkIn: convertToISOFormat(reservationData.checkIn),
-                    checkOut: convertToISOFormat(reservationData.checkOut),
+                    checkIn: reservationData.checkIn,
+                    checkOut: reservationData.checkOut,
                     price: reservationData.price,
                 }),
             });
@@ -191,14 +183,14 @@ const EditReservationList = ({ reservation }) => {
                                 <InputWithIcon
                                     label="Check In"
                                     icon="mdi:calendar-range"
-                                    type="text"
+                                    type="date"
                                     value={reservationData.checkIn}
                                     onChange={(val) => handleChange("checkIn", val)}
                                 />
                                 <InputWithIcon
                                     label="Check Out"
                                     icon="mdi:calendar-range"
-                                    type="text"
+                                    type="date"
                                     value={reservationData.checkOut}
                                     onChange={(val) => handleChange("checkOut", val)}
                                 />

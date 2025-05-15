@@ -6,6 +6,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     const [formData, setFormData] = useState({
         nik: "",
         name: "",
+        address: "",
         birthDate: "",
         birthPlace: "",
     });
@@ -33,6 +34,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         setFormData({
             nik: "",
             name: "",
+            address: "",
             birthDate: "",
             birthPlace: "",
         });
@@ -57,7 +59,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         const formattedValue =
-            name === "name" || name === "birthPlace" ? value.toUpperCase() : value;
+            name === "name" || name === "birthPlace" || name === "address" ?value.toUpperCase() : value;
 
         setFormData((prev) => ({
             ...prev,
@@ -74,9 +76,9 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     };
 
     const validateForm = () => {
-        const { nik, name, birthDate, birthPlace } = formData;
+        const { nik, name, birthDate, birthPlace, address } = formData;
 
-        if (!nik || !name || !birthDate || !birthPlace) {
+        if (!nik || !name || !birthDate || !birthPlace || !address) {
             toast.error("Semua field wajib diisi!");
             return false;
         }
@@ -139,12 +141,14 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                 body: JSON.stringify(payload),
             });
 
-            const memberResult = await memberRes.json();
-
             if (!memberRes.ok) {
-                toast.error(memberResult.error || "Gagal menambahkan member.");
+                const errorText = await memberRes.text();
+                console.error("Failed to create member:", errorText);
+                toast.error("Gagal menambahkan member.");
                 return;
             }
+
+            const memberResult = await memberRes.json();
 
             const member = memberResult.member;
 
@@ -153,8 +157,8 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     memberId: String(member.id),
                     roomNumber: reservationData.roomNumber,
                     price: Number(reservationData.price) || 0,
-                    checkIn: convertToISOFormat(reservationData.checkIn),
-                    checkOut: convertToISOFormat(reservationData.checkOut),
+                    checkIn: reservationData.checkIn,
+                    checkOut: reservationData.checkOut,
                     ...(showMeal && {
                         mealCost: Number(reservationData.mealCost) || 0,
                         mealType: reservationData.mealType,
@@ -195,18 +199,12 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             resetForm();
             onClose();
         } catch (error) {
-            console.error(error);
+            console.error("Test", error);
             toast.error("Terjadi kesalahan saat mengirim data.");
         } finally {
             setIsLoading(false);
         }
     };
-
-    const convertToISOFormat = (date) => {
-        const [day, month, year] = date.split("-");
-        return `${year}-${month}-${day}`;
-    };
-
 
     if (!isOpen) return null;
 
@@ -227,6 +225,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                             {[
                                 { label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
                                 { label: "Nama", name: "name", placeholder: "Masukkan Nama" },
+                                { label: "Alamat", name: "address", placeholder: "Masukkan Alamat" },
                                 { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir" }
                             ].map((field) => (
                                 <div key={field.name}>
@@ -245,7 +244,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
                                 <input
-                                    type="text"
+                                    type="date"
                                     name="birthDate"
                                     value={formData.birthDate}
                                     onChange={handleChange}
@@ -298,7 +297,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     <div>
                                         <label className="form-label">Check-In</label>
                                         <input
-                                            type="text"
+                                            type="date"
                                             name="checkIn"
                                             value={reservationData.checkIn}
                                             onChange={handleReservationChange}
@@ -310,7 +309,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     <div>
                                         <label className="form-label">Check-Out</label>
                                         <input
-                                            type="text"
+                                            type="date"
                                             name="checkOut"
                                             value={reservationData.checkOut}
                                             onChange={handleReservationChange}

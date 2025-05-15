@@ -5,31 +5,19 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const [formData, setFormData] = useState({
         nik: "",
         name: "",
+        address: "",
         birthDate: "",
         birthPlace: "",
     });
     const [isLoading, setIsLoading] = useState(false);
-    const convertToDisplayFormat = (date) => {
-        if (!date) return "";
-        const [year, month, day] = date.split("-");
-        return `${day}-${month}-${year}`;
-    };
-
-    const convertToISOFormat = (date) => {
-        const [day, month, year] = date.split("-");
-        return `${year}-${month}-${day}`;
-    };
-
-    const isValidDateFormat = (dateStr) => {
-        return /^\d{2}-\d{2}-\d{4}$/.test(dateStr);
-    };
 
     useEffect(() => {
         if (member) {
             setFormData({
                 nik: member.nik || "",
                 name: member.name?.toUpperCase() || "",
-                birthDate: convertToDisplayFormat(member.birthDate?.slice(0, 10)) || "",
+                address: member.address?.toUpperCase() || "",
+                birthDate: member.birthDate?.slice(0, 10) || "",
                 birthPlace: member.birthPlace?.toUpperCase() || "",
             });
         }
@@ -38,7 +26,8 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         let formattedValue = value;
-        if (name === "name" || name === "birthPlace") {
+
+        if (name === "name" || name === "birthPlace" || name === "address") {
             formattedValue = value.toUpperCase();
         }
 
@@ -51,9 +40,9 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { nik, name, birthDate, birthPlace } = formData;
+        const { nik, name, birthDate, birthPlace, address } = formData;
 
-        if (!nik || !name || !birthDate || !birthPlace) {
+        if (!nik || !name || !birthDate || !birthPlace || !address) {
             toast.error("Semua field wajib diisi!");
             return;
         }
@@ -63,24 +52,17 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             return;
         }
 
-        if (!isValidDateFormat(birthDate)) {
-            toast.error("Tanggal lahir harus dalam format DD-MM-YYYY.");
-            return;
-        }
-
         setIsLoading(true);
 
         try {
             const res = await fetch(`/api/members/${member.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...formData,
-                    birthDate: convertToISOFormat(birthDate),
-                }),
+                body: JSON.stringify(formData),
             });
 
             const result = await res.json();
+            console.log("Result:", result)
 
             if (!res.ok) {
                 toast.error(result.error || "Gagal mengupdate member.");
@@ -105,7 +87,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                 <div className="modal-content rounded-4 shadow-lg">
                     <div className="modal-header bg-light rounded-top-4">
                         <h5 className="modal-title">Edit Member</h5>
-                        <button type="button" className="btn-close" onClick={onClose}></button>
+                        <button type="button" className="btn-close" onClick={onClose} disabled={isLoading}></button>
                     </div>
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
@@ -118,6 +100,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                     onChange={handleChange}
                                     className="form-control"
                                     placeholder="Masukkan NIK"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
@@ -129,6 +112,19 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                     onChange={handleChange}
                                     className="form-control"
                                     placeholder="Masukkan Nama"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label">Alamat</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    className="form-control"
+                                    placeholder="Masukkan Alamat"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
@@ -140,17 +136,18 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                                     onChange={handleChange}
                                     className="form-control"
                                     placeholder="Masukkan Tempat Lahir"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
                                 <label className="form-label">Tanggal Lahir</label>
                                 <input
-                                    type="text"
+                                    type="date"
                                     name="birthDate"
                                     value={formData.birthDate}
                                     onChange={handleChange}
                                     className="form-control"
-                                    placeholder="DD-MM-YYYY"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <button type="submit" className="btn btn-warning mt-3" disabled={isLoading}>

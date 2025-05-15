@@ -30,6 +30,10 @@ const MemberDetailModal = ({ isOpen, onClose, member }) => {
                                 <p>{member.name}</p>
                             </div>
                             <div>
+                                <label className="form-label">Alamat</label>
+                                <p>{member.address}</p>
+                            </div>
+                            <div>
                                 <label className="form-label">Tempat Lahir</label>
                                 <p>{member.birthPlace}</p>
                             </div>

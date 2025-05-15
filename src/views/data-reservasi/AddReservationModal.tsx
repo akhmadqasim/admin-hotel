@@ -24,12 +24,6 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const convertToISOFormat = (date) => {
-        const [day, month, year] = date.split("-");
-        return `${year}-${month}-${day}`;
-    };
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -38,8 +32,8 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
             return;
         }
 
-        const start = new Date(convertToISOFormat(form.checkIn) + "T00:00:00");
-        const end = new Date(convertToISOFormat(form.checkOut) + "T00:00:00");
+        const start = new Date(form.checkIn);
+        const end = new Date(form.checkOut);
         if (start > end) {
             toast.error("Check-out tidak boleh lebih awal dari check-in");
             return;
@@ -68,8 +62,8 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
         const payload = {
             memberId: member.id,
             roomNumber: form.roomNumber,
-            checkIn: convertToISOFormat(form.checkIn),
-            checkOut: convertToISOFormat(form.checkOut),
+            checkIn: form.checkIn,
+            checkOut: form.checkOut,
             price: parseInt(form.price || "0"),
             ...(showMeal && {
                 mealCost: parseInt(form.mealCost || "0"),
@@ -186,7 +180,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                             <div>
                                 <label className="form-label">Check-In</label>
                                 <input
-                                    type="text"
+                                    type="date"
                                     className="form-control"
                                     name="checkIn"
                                     placeholder="DD-MM-YYYY"
@@ -201,7 +195,7 @@ const AddReservationModal = ({ isOpen, onClose, onSubmit, member }) => {
                             <div>
                                 <label className="form-label">Check-Out</label>
                                 <input
-                                    type="text"
+                                    type="date"
                                     className="form-control"
                                     name="checkOut"
                                     placeholder="DD-MM-YYYY"

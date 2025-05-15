@@ -104,19 +104,25 @@ export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ memb
         ...(body.nik ? {nik: body.nik.toString()} : {}),
         ...(body.name ? {name: body.name} : {}),
         ...(body.address ? {address: body.address} : {}),
-        ...(body.birthDate ? {birthDate: body.birthDate} : {}),
+        ...(body.birthDate ? {birthDate: new Date(body.birthDate)} : {}),
         ...(body.birthPlace ? {birthPlace: body.birthPlace} : {}),
       }
     });
 
+    console.log("Member updated:", member);
+
     return NextResponse.json({member});
   } catch (e) {
+    console.error("Error updating member:", e);
+
     prisma.errorLog.create({
       data: {
         message: e.message,
         stack: e,
       }
     })
+
+    console.error("Error updating member:", e);
 
     return NextResponse.json({message: 'Internal server error'}, {status: 500})
   }

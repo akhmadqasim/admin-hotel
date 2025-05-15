@@ -11,6 +11,7 @@ const DataTamuPage = async () => {
       }
     }
   })
+  console.log(members)
 
   return (
     <div>
