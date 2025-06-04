@@ -9,7 +9,6 @@ import * as v from "valibot";
 
 const reservationSchemaPatch = v.object({
     memberId: v.optional(v.string()),
-    code: v.string(),
     checkIn: v.optional(v.date()),
     checkOut: v.optional(v.date()),
     roomNumber: v.optional(v.string()),
@@ -83,7 +82,6 @@ export const PATCH = async (req: NextRequest, {params}: { params: Promise<{ rese
 
         const data = v.parse(reservationSchemaPatch, {
             ...(body.memberId ? {memberId: body.memberId} : {}),
-            ...(body.code ? {code: body.code} : {}),
             ...(body.checkIn ? {checkIn: new Date(body.checkIn)} : {}),
             ...(body.checkOut ? {checkOut: new Date(body.checkOut)} : {}),
             ...(body.roomNumber ? {roomNumber: body.roomNumber} : {}),

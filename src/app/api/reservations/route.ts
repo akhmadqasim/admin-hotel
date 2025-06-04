@@ -11,7 +11,6 @@ const reservationSchema = v.object({
   memberId: v.string(),
   checkIn: v.optional(v.date()),
   checkOut: v.optional(v.date()),
-    code: v.string(),
   roomNumber: v.optional(v.string()),
   price: v.optional(v.number()),
   mealType: v.optional(v.string()),
@@ -60,7 +59,6 @@ export const POST = async (req: NextRequest) => {
       ...(body.laundryCost ? {laundryCost: body.laundryCost} : {}),
       ...(body.otherType ? {otherType: body.otherType} : {}),
       ...(body.otherCost ? {otherCost: body.otherCost} : {}),
-      ...(body.code ? {code: body.code} : {})
     });
 
     const reservation = await prisma.reservation.create({
@@ -69,7 +67,6 @@ export const POST = async (req: NextRequest) => {
         checkIn: data.checkIn,
         checkOut: data.checkOut,
         roomNumber: data.roomNumber,
-        code: data.code,
         price: data.price,
         ...(data.mealType ? {
           mealCost: {
