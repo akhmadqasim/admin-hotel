@@ -37,6 +37,7 @@ model Member {
 model Reservation {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   memberId    String        @db.ObjectId
+  code        String        @unique
   checkIn     DateTime
   checkOut    DateTime?
   roomNumber  String?
