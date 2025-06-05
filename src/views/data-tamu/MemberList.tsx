@@ -114,6 +114,7 @@ const MemberList = ({ data }) => {
                         <thead>
                         <tr>
                             <th>No</th>
+                            <th>Kode</th>
                             <th>NIK</th>
                             <th>Nama</th>
                             <th>Alamat</th>
@@ -127,6 +128,7 @@ const MemberList = ({ data }) => {
                         {paginatedMembers.map((member, index) => (
                             <tr key={member.id}>
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                <td>{member.code}</td>
                                 <td>{member.nik}</td>
                                 <td>{member.name}</td>
                                 <td>{member.address}</td>

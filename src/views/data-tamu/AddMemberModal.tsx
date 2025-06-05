@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     const [formData, setFormData] = useState({
+        code: "",
         nik: "",
         name: "",
         address: "",
@@ -32,6 +33,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
     const resetForm = () => {
         setFormData({
+            code: "",
             nik: "",
             name: "",
             address: "",
@@ -59,7 +61,9 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         const formattedValue =
-            name === "name" || name === "birthPlace" || name === "address" ?value.toUpperCase() : value;
+            name === "name" || name === "birthPlace" || name === "address"
+                ? value.toUpperCase()
+                : value;
 
         setFormData((prev) => ({
             ...prev,
@@ -76,10 +80,20 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     };
 
     const validateForm = () => {
-        const { nik, name, birthDate, birthPlace, address } = formData;
+        const { code, nik, name, birthDate, birthPlace, address } = formData;
 
-        if (!nik || !name || !birthDate || !birthPlace || !address) {
+        if (!code || !nik || !name || !birthDate || !birthPlace || !address) {
             toast.error("Semua field wajib diisi!");
+            return false;
+        }
+
+        if (!/^[A-Za-z0-9]+$/.test(code)) {
+            toast.error("Kode Member hanya boleh huruf dan angka tanpa spasi.");
+            return false;
+        }
+
+        if (members.some((m) => m.code === code)) {
+            toast.error("Kode Member sudah terdaftar.");
             return false;
         }
 
@@ -128,9 +142,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        const payload = {
-            ...formData,
-        };
+        const payload = { ...formData };
 
         setIsLoading(true);
 
@@ -142,14 +154,12 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             });
 
             if (!memberRes.ok) {
-                const errorText = await memberRes.text();
-                console.error("Failed to create member:", errorText);
+                console.error("Gagal menambahkan member:", memberRes.statusText);
                 toast.error("Gagal menambahkan member.");
                 return;
             }
 
             const memberResult = await memberRes.json();
-
             const member = memberResult.member;
 
             if (hasReservation) {
@@ -193,13 +203,11 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
             onSubmit(member);
             toast.success("Member berhasil ditambahkan!");
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
+            setTimeout(() => window.location.reload(), 500);
             resetForm();
             onClose();
         } catch (error) {
-            console.error("Test", error);
+            console.error("Error:", error);
             toast.error("Terjadi kesalahan saat mengirim data.");
         } finally {
             setIsLoading(false);
@@ -223,6 +231,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
                             {[
+                                { label: "Kode Member", name: "code", placeholder: "Masukkan Kode Member" },
                                 { label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
                                 { label: "Nama", name: "name", placeholder: "Masukkan Nama" },
                                 { label: "Alamat", name: "address", placeholder: "Masukkan Alamat" },

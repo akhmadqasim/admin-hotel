@@ -22,6 +22,10 @@ const MemberDetailModal = ({ isOpen, onClose, member }) => {
                     <div className="modal-body">
                         <div className="d-flex flex-column gap-3">
                             <div>
+                                <label className="form-label">Kode Member</label>
+                                <p>{member.code}</p>
+                            </div>
+                            <div>
                                 <label className="form-label">NIK</label>
                                 <p>{member.nik}</p>
                             </div>

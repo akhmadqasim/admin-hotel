@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 
 const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     const [formData, setFormData] = useState({
+        code: "",
         nik: "",
         name: "",
         address: "",
@@ -14,6 +15,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
     useEffect(() => {
         if (member) {
             setFormData({
+                code: member.code || "",
                 nik: member.nik || "",
                 name: member.name?.toUpperCase() || "",
                 address: member.address?.toUpperCase() || "",
@@ -27,7 +29,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         const { name, value } = e.target;
         let formattedValue = value;
 
-        if (name === "name" || name === "birthPlace" || name === "address") {
+        if (["name", "birthPlace", "address"].includes(name)) {
             formattedValue = value.toUpperCase();
         }
 
@@ -39,12 +41,16 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const { code, nik, name, birthDate, birthPlace, address } = formData;
 
-        const { nik, name, birthDate, birthPlace, address } = formData;
-
-        if (!nik || !name || !birthDate || !birthPlace || !address) {
+        if (!code || !nik || !name || !birthDate || !birthPlace || !address) {
             toast.error("Semua field wajib diisi!");
             return;
+        }
+
+        if (!/^[A-Za-z0-9]+$/.test(code)) {
+            toast.error("Kode Member hanya boleh huruf dan angka tanpa spasi.");
+            return false;
         }
 
         if (!/^\d+$/.test(nik)) {
@@ -62,10 +68,9 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             });
 
             const result = await res.json();
-            console.log("Result:", result)
 
             if (!res.ok) {
-                toast.error(result.error || "Gagal mengupdate member.");
+                toast.error("Gagal memperbarui member!");
                 return;
             }
 
@@ -73,6 +78,7 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
             onSubmit(result.member);
             onClose();
         } catch (error) {
+            console.error("Update error:", error);
             toast.error("Terjadi kesalahan saat mengirim data.");
         } finally {
             setIsLoading(false);
@@ -91,6 +97,18 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
                     </div>
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+                            <div>
+                                <label className="form-label">Kode Member</label>
+                                <input
+                                    type="text"
+                                    name="code"
+                                    value={formData.code}
+                                    onChange={handleChange}
+                                    className="form-control"
+                                    placeholder="Masukkan Kode Member"
+                                    disabled={isLoading}
+                                />
+                            </div>
                             <div>
                                 <label className="form-label">NIK</label>
                                 <input
