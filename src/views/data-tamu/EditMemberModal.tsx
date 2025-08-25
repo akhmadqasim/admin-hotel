@@ -29,7 +29,15 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         const { name, value } = e.target;
         let formattedValue = value;
 
-        if (["name", "birthPlace", "address"].includes(name)) {
+        if (name === "code") {
+            const raw = value.replace(/\D/g, "");
+
+            if (raw.length >= 3) {
+                formattedValue = raw.slice(0, 2) + "/" + raw.slice(2, 4);
+            } else {
+                formattedValue = raw;
+            }
+        } else if (["name", "birthPlace", "address"].includes(name)) {
             formattedValue = value.toUpperCase();
         }
 
@@ -39,20 +47,11 @@ const EditMemberModal = ({ isOpen, onClose, member, onSubmit }) => {
         }));
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { code, nik, name, birthDate, birthPlace, address } = formData;
-
-        if (!code || !nik || !name || !birthDate || !birthPlace || !address) {
-            toast.error("Semua field wajib diisi!");
-            return;
-        }
-
-        if (!/^[A-Za-z0-9]+$/.test(code)) {
-            toast.error("Kode Member hanya boleh huruf dan angka tanpa spasi.");
-            return false;
-        }
-
+        
         if (!/^\d+$/.test(nik)) {
             toast.error("NIK hanya boleh angka!");
             return;

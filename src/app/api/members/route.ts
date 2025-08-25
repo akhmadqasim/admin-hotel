@@ -8,12 +8,12 @@ import {prisma} from "@/helper/prisma";
 import * as v from "valibot";
 
 const memberSchema = v.object({
-    nik: v.string(),
+    nik: v.optional(v.string()),
     code: v.string(),
     address: v.optional(v.string()),
     name: v.string(),
-    birthDate: v.date(),
-    birthPlace: v.string()
+    birthDate: v.optional(v.date()),
+    birthPlace: v.optional(v.string())
 });
 
 export const GET = async () => {
@@ -40,11 +40,11 @@ export const POST = async (req: NextRequest) => {
         const body = await req.json();
 
         const data = v.parse(memberSchema, {
-            nik: body.nik,
             code: body.code,
             name: body.name,
-            birthDate: new Date(body.birthDate),
-            birthPlace: body.birthPlace,
+            ...(body.nik ? {nik: body.nik} : {}),
+            ...(body.birthPlace ? {birthPlace: body.birthPlace} : {}),
+            ...(body.birthDate ? {birthDate: new Date(body.birthDate)} : {}),
             ...(body.address ? {address: body.address} : {})
         })
 

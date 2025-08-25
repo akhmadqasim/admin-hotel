@@ -24,12 +24,12 @@ model User {
 
 model Member {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  nik          String        @unique
+  nik          String?       @unique
   code         String        @unique
   name         String
   address      String?
-  birthDate    DateTime
-  birthPlace   String
+  birthDate    DateTime?
+  birthPlace   String?
   reservations Reservation[]
 
   @@map("members")

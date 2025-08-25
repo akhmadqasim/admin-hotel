@@ -60,16 +60,26 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        const formattedValue =
-            name === "name" || name === "birthPlace" || name === "address"
-                ? value.toUpperCase()
-                : value;
+        let formattedValue = value;
+
+        if (name === "code") {
+            const raw = value.replace(/\D/g, "");
+
+            if (raw.length >= 3) {
+                formattedValue = raw.slice(0, 2) + "/" + raw.slice(2, 4);
+            } else {
+                formattedValue = raw;
+            }
+        } else if (name === "name" || name === "birthPlace" || name === "address") {
+            formattedValue = value.toUpperCase();
+        }
 
         setFormData((prev) => ({
             ...prev,
             [name]: formattedValue,
         }));
     };
+
 
     const handleReservationChange = (e) => {
         const { name, value } = e.target;
@@ -80,59 +90,40 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
     };
 
     const validateForm = () => {
-        const { code, nik, name, birthDate, birthPlace, address } = formData;
-
-        if (!code || !nik || !name || !birthDate || !birthPlace || !address) {
-            toast.error("Semua field wajib diisi!");
+        // wajib isi: kode member & nama
+        if (!formData.code.trim()) {
+            toast.error("Kode Member wajib diisi.");
             return false;
         }
 
-        if (!/^[A-Za-z0-9]+$/.test(code)) {
-            toast.error("Kode Member hanya boleh huruf dan angka tanpa spasi.");
+        if (!formData.name.trim()) {
+            toast.error("Nama wajib diisi.");
             return false;
         }
 
-        if (members.some((m) => m.code === code)) {
+        // validasi duplikasi
+        if (members.some((m) => m.code === formData.code)) {
             toast.error("Kode Member sudah terdaftar.");
             return false;
         }
 
-        if (!/^\d+$/.test(nik)) {
-            toast.error("NIK hanya boleh berupa angka.");
-            return false;
-        }
-
-        if (members.some((m) => m.nik === nik)) {
+        if (formData.nik && members.some((m) => m.nik === formData.nik)) {
             toast.error("NIK sudah terdaftar.");
             return false;
         }
 
-        if (hasReservation) {
-            const { roomNumber, checkIn, checkOut } = reservationData;
-            if (!roomNumber || !checkIn || !checkOut) {
-                toast.error("Nomor kamar, check-in, dan check-out wajib diisi!");
-                return false;
-            }
+        // validasi format nik
+        if (formData.nik && !/^\d+$/.test(formData.nik)) {
+            toast.error("NIK hanya boleh berupa angka.");
+            return false;
+        }
 
-            if (new Date(checkIn) > new Date(checkOut)) {
+        // validasi reservasi opsional
+        if (reservationData.checkIn && reservationData.checkOut) {
+            if (new Date(reservationData.checkIn) > new Date(reservationData.checkOut)) {
                 toast.error("Tanggal check-in tidak boleh setelah check-out.");
                 return false;
             }
-        }
-
-        if (showMeal && (!reservationData.mealCost || !reservationData.mealType)) {
-            toast.error("Biaya dan jenis makanan wajib diisi!");
-            return false;
-        }
-
-        if (showLaundry && (!reservationData.laundryCost || !reservationData.laundryType)) {
-            toast.error("Biaya dan jenis laundry wajib diisi!");
-            return false;
-        }
-
-        if (showOther && (!reservationData.otherCost || !reservationData.otherType)) {
-            toast.error("Biaya dan jenis lainnya wajib diisi!");
-            return false;
         }
 
         return true;
@@ -142,7 +133,15 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        const payload = { ...formData };
+        const payload = {
+            ...formData,
+            nik: formData.nik?.trim() === "" ? null : formData.nik,
+            address: formData.address?.trim() === "" ? null : formData.address,
+            birthPlace: formData.birthPlace?.trim() === "" ? null : formData.birthPlace,
+            birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : null,
+        };
+
+        console.log("📦 Payload dikirim ke API /members:", payload);
 
         setIsLoading(true);
 
@@ -154,8 +153,9 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             });
 
             if (!memberRes.ok) {
-                console.error("Gagal menambahkan member:", memberRes.statusText);
                 toast.error("Gagal menambahkan member.");
+                console.error("Failed to add member:", await memberRes.text());
+                console.log("🚫 Response status:", memberRes.status);
                 return;
             }
 
@@ -165,21 +165,21 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
             if (hasReservation) {
                 const reservationPayload = {
                     memberId: String(member.id),
-                    roomNumber: reservationData.roomNumber,
-                    price: Number(reservationData.price) || 0,
-                    checkIn: reservationData.checkIn,
-                    checkOut: reservationData.checkOut,
+                    roomNumber: reservationData.roomNumber || null,
+                    price: reservationData.price ? Number(reservationData.price) : null,
+                    checkIn: reservationData.checkIn || null,
+                    checkOut: reservationData.checkOut || null,
                     ...(showMeal && {
-                        mealCost: Number(reservationData.mealCost) || 0,
-                        mealType: reservationData.mealType,
+                        mealCost: reservationData.mealCost ? Number(reservationData.mealCost) : null,
+                        mealType: reservationData.mealType || null,
                     }),
                     ...(showLaundry && {
-                        laundryCost: Number(reservationData.laundryCost) || 0,
-                        laundryType: reservationData.laundryType,
+                        laundryCost: reservationData.laundryCost ? Number(reservationData.laundryCost) : null,
+                        laundryType: reservationData.laundryType || null,
                     }),
                     ...(showOther && {
-                        otherCost: Number(reservationData.otherCost) || 0,
-                        otherType: reservationData.otherType,
+                        otherCost: reservationData.otherCost ? Number(reservationData.otherCost) : null,
+                        otherType: reservationData.otherType || null,
                     }),
                 };
 
@@ -230,12 +230,13 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                     </div>
                     <div className="modal-body">
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+
                             {[
-                                { label: "Kode Member", name: "code", placeholder: "Masukkan Kode Member" },
-                                { label: "NIK", name: "nik", placeholder: "Masukkan NIK" },
-                                { label: "Nama", name: "name", placeholder: "Masukkan Nama" },
-                                { label: "Alamat", name: "address", placeholder: "Masukkan Alamat" },
-                                { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir" }
+                                { label: "Nama", name: "name", placeholder: "Masukkan Nama", required: true },
+                                { label: "Kode Member", name: "code", placeholder: "Masukkan Kode Member", required: true },
+                                { label: "NIK", name: "nik", placeholder: "Masukkan NIK", required: false },
+                                { label: "Alamat", name: "address", placeholder: "Masukkan Alamat", required: false },
+                                { label: "Tempat Lahir", name: "birthPlace", placeholder: "Masukkan Tempat Lahir", required: false }
                             ].map((field) => (
                                 <div key={field.name}>
                                     <label className="form-label">{field.label}</label>
@@ -246,6 +247,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         onChange={handleChange}
                                         className="form-control"
                                         placeholder={field.placeholder}
+                                        required={field.required}
                                     />
                                 </div>
                             ))}
@@ -258,10 +260,10 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     value={formData.birthDate}
                                     onChange={handleChange}
                                     className="form-control"
-                                    placeholder="DD-MM-YYYY"
                                 />
                             </div>
 
+                            {/* switch reservasi */}
                             <div className="form-switch d-flex align-items-center gap-2">
                                 <input
                                     className="form-check-input cursor-pointer"
@@ -276,6 +278,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                 </label>
                             </div>
 
+                            {/* bagian reservasi opsional */}
                             {hasReservation && (
                                 <>
                                     <div>
@@ -311,7 +314,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             value={reservationData.checkIn}
                                             onChange={handleReservationChange}
                                             className="form-control"
-                                            placeholder="DD-MM-YYYY"
                                         />
                                     </div>
 
@@ -323,10 +325,10 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             value={reservationData.checkOut}
                                             onChange={handleReservationChange}
                                             className="form-control"
-                                            placeholder="DD-MM-YYYY"
                                         />
                                     </div>
 
+                                    {/* toggle biaya makan */}
                                     <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
@@ -339,7 +341,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             Tambah Biaya Makan
                                         </label>
                                     </div>
-
                                     {showMeal && (
                                         <div className="border rounded p-3">
                                             <div className="mt-2">
@@ -368,6 +369,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         </div>
                                     )}
 
+                                    {/* toggle biaya laundry */}
                                     <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
@@ -380,7 +382,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             Tambah Biaya Laundry
                                         </label>
                                     </div>
-
                                     {showLaundry && (
                                         <div className="border rounded p-3">
                                             <div className="mt-2">
@@ -409,6 +410,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                         </div>
                                     )}
 
+                                    {/* toggle biaya lainnya */}
                                     <div className="form-check d-flex align-items-center gap-2">
                                         <input
                                             className="form-check-input"
@@ -421,7 +423,6 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                             Tambah Biaya Lainnya
                                         </label>
                                     </div>
-
                                     {showOther && (
                                         <div className="border rounded p-3">
                                             <div className="mt-2">
@@ -451,6 +452,7 @@ const AddMemberModal = ({ isOpen, onClose, onSubmit, members }) => {
                                     )}
                                 </>
                             )}
+
                             <div className="d-flex justify-content-end">
                                 <button
                                     type="button"

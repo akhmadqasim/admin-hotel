@@ -37,7 +37,7 @@ const MemberList = ({ data }) => {
         setSelectedMember(null);
     };
 
-    const convertToDisplayFormat = (date) => {
+    const convertToDisplayFormat = (date?: string | null) => {
         if (!date) return "";
         const [year, month, day] = date.split("-");
         return `${day}-${month}-${year}`;
@@ -115,8 +115,8 @@ const MemberList = ({ data }) => {
                         <tr>
                             <th>No</th>
                             <th>Kode</th>
-                            <th>NIK</th>
                             <th>Nama</th>
+                            <th>NIK</th>
                             <th>Alamat</th>
                             <th>Tanggal Lahir</th>
                             <th>Tempat Lahir</th>
@@ -129,10 +129,10 @@ const MemberList = ({ data }) => {
                             <tr key={member.id}>
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                 <td>{member.code}</td>
-                                <td>{member.nik}</td>
                                 <td>{member.name}</td>
+                                <td>{member.nik}</td>
                                 <td>{member.address}</td>
-                                <td>{convertToDisplayFormat(member.birthDate.slice(0, 10))}</td>
+                                <td>{convertToDisplayFormat(member.birthDate?.slice(0, 10))}</td>
                                 <td>{member.birthPlace}</td>
                                 <td>{member._count?.reservations ?? 0}</td>
                                 <td className="text-center">
